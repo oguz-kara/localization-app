@@ -2,84 +2,13 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input AddCompanyNoteInput {
-  content: String!
-  type: String
-}
-
-"""The type of attributable entity"""
-enum AttributableType {
-  COMPANY
-}
-
-"""The data type of the attribute"""
-enum AttributeDataType {
-  BOOLEAN
-  DATE
-  NUMBER
-  TEXT
-}
-
-input AttributeFilterInput {
-  attributeTypeId: ID!
-  valueIds: [ID!]!
-}
-
-type AttributeGroup {
-  code: String!
-  id: ID!
-  isSystemDefined: Boolean!
+type ApiKeyEntity {
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isActive: Boolean!
+  key: String
   name: String!
-  order: Int
-}
-
-type AttributeGroupConnection {
-  items: [AttributeGroup!]!
-  totalCount: Int!
-}
-
-type AttributeType {
-  availableFor: [AttributableType!]!
-  channelToken: String!
-  code: String!
-  createdAt: DateTime
-  dataType: AttributeDataType!
-  group: AttributeGroup
-  groupId: String
-  id: ID!
-  isSystemDefined: Boolean!
-  kind: AttributeTypeKind!
-  name: String!
-  order: Int!
-  updatedAt: DateTime
-}
-
-type AttributeTypeConnection {
-  items: [AttributeType!]!
-  totalCount: Int!
-}
-
-"""The kind of attribute type"""
-enum AttributeTypeKind {
-  HIERARCHICAL
-  MULTI_SELECT
-  SELECT
-  TEXT
-}
-
-type AttributeValue {
-  attributeTypeId: ID!
-  code: String!
-  id: ID!
-  meta: JSON
-  parentId: ID
-  type: AttributeType
-  value: String!
-}
-
-type AttributeValueConnection {
-  items: [AttributeValue!]!
-  totalCount: Int!
 }
 
 type AuthenticationPayload {
@@ -101,80 +30,8 @@ type ChannelConnection {
   totalCount: Int!
 }
 
-type Company {
-  address: JSON
-  addressAttributeCodes: [String!]
-  attributes: [AttributeValue!]
-  channelToken: String
-  createdAt: DateTime!
-  deletedAt: DateTime
+input CreateApiKeyInput {
   description: String
-  email: String
-  id: ID!
-  linkedinUrl: String
-  name: String!
-  notes(
-    """Search query"""
-    searchQuery: String
-
-    """Number of items to skip"""
-    skip: Int = 0
-
-    """Number of items to take"""
-    take: Int = 10
-  ): CompanyConnectionNotes!
-  phoneNumber: String
-  socialProfiles: JSON
-  taxId: String
-  updatedAt: DateTime!
-  website: String
-}
-
-type CompanyConnection {
-  items: [Company!]!
-  totalCount: Int!
-}
-
-type CompanyConnectionNotes {
-  items: [CompanyNote!]!
-  totalCount: Int!
-}
-
-type CompanyNote {
-  channelToken: ID!
-  companyId: ID!
-  content: String!
-  createdAt: DateTime!
-  id: ID!
-  type: CompanyNoteType
-  updatedAt: DateTime!
-  userId: ID!
-}
-
-enum CompanyNoteType {
-  CALL
-  FOLLOW_UP
-  GENERAL
-  MEETING
-}
-
-input CreateAttributeGroupInput {
-  name: String!
-}
-
-input CreateAttributeInput {
-  attributeTypeId: ID!
-  meta: JSON
-  parentId: ID
-  value: String!
-}
-
-input CreateAttributeTypeInput {
-  availableFor: [AttributableType!]!
-  config: JSON
-  dataType: AttributeDataType!
-  groupId: ID
-  kind: AttributeTypeKind!
   name: String!
 }
 
@@ -184,22 +41,17 @@ input CreateChannelInput {
   token: String
 }
 
-input CreateCompanyInput {
-  address: JSON
-
-  """
-  Hiyerarşik adres değerlerinin kodları (örn: ["turkiye", "izmir", "bornova"])
-  """
-  addressAttributeCodes: [String!]
-  attributeIds: [String!]
+input CreateProjectInput {
   description: String
-  email: String
-  linkedinUrl: String
   name: String!
-  phoneNumber: String
-  socialProfiles: JSON
-  taxId: String
-  website: String
+  slug: String!
+}
+
+input CreateTranslationKeyInput {
+  context: String
+  description: String
+  key: String!
+  projectId: String!
 }
 
 """
@@ -207,35 +59,10 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
-input GetAttributeValuesByCodeArgs {
-  attributeTypeCode: String!
-  parentCode: String
-
-  """Search query"""
-  searchQuery: String
-
-  """Number of items to skip"""
-  skip: Int = 0
-
-  """Number of items to take"""
-  take: Int = 10
-}
-
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
 scalar JSON
-
-input ListQueryArgs {
-  """Search query"""
-  searchQuery: String
-
-  """Number of items to skip"""
-  skip: Int = 0
-
-  """Number of items to take"""
-  take: Int = 10
-}
 
 input LoginUserInput {
   email: String!
@@ -247,54 +74,31 @@ type LogoutOutput {
 }
 
 type Mutation {
-  addNoteToCompany(addCompanyNoteInput: AddCompanyNoteInput!, companyId: ID!): CompanyNote!
-  createAttributeGroup(createAttributeGroupInput: CreateAttributeGroupInput!): AttributeGroup!
-  createAttributeType(createAttributeTypeInput: CreateAttributeTypeInput!): AttributeType!
-  createAttributeValue(createAttributeValueInput: CreateAttributeInput!): AttributeValue!
+  createApiKey(input: CreateApiKeyInput!): ApiKeyEntity!
   createChannel(createChannelInput: CreateChannelInput!): Channel!
-  createCompany(createCompanyInput: CreateCompanyInput!): Company!
-  deleteAttributeGroup(id: ID!): Boolean!
-  deleteAttributeType(id: ID!): Boolean!
-  deleteAttributeValue(id: ID!): Boolean!
-  deleteCompany(id: ID!): Company!
-  deleteCompanyNote(noteId: ID!): CompanyNote!
+  createProject(input: CreateProjectInput!): ProjectEntity!
+  createTranslationKey(input: CreateTranslationKeyInput!): TranslationKeyEntity!
+  deleteApiKey(id: String!): Boolean!
   loginUser(loginUserInput: LoginUserInput!): AuthenticationPayload!
   logoutUser: LogoutOutput!
   registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!
   registerUser(channelToken: String!, registerUserInput: RegisterUserInput!): AuthenticationPayload!
-  updateAttributeGroup(id: ID!, updateAttributeGroupInput: UpdateAttributeGroupInput!): AttributeGroup!
-  updateAttributeType(id: ID!, updateAttributeTypeInput: UpdateAttributeTypeInput!): AttributeType!
-  updateAttributeValue(id: ID!, updateAttributeValueInput: UpdateAttributeInput!): AttributeValue!
-  updateCompany(id: ID!, updateCompanyInput: UpdateCompanyInput!): Company!
-  updateCompanyNote(noteId: ID!, updateCompanyNoteInput: UpdateCompanyNoteInput!): CompanyNote!
+  revokeApiKey(id: String!): Boolean!
+}
+
+type ProjectEntity {
+  channelToken: String!
+  createdAt: DateTime!
+  description: String
+  id: String!
+  isActive: Boolean!
+  name: String!
+  slug: String!
+  updatedAt: DateTime!
 }
 
 type Query {
-  attributeGroups(
-    """Search query"""
-    searchQuery: String
-
-    """Number of items to skip"""
-    skip: Int = 0
-
-    """Number of items to take"""
-    take: Int = 10
-  ): AttributeGroupConnection!
-  attributeTypes(args: ListQueryArgs, includeSystemDefined: Boolean = false): AttributeTypeConnection!
-  attributeValues(
-    attributeTypeId: ID!
-    parentId: ID
-
-    """Search query"""
-    searchQuery: String
-
-    """Number of items to skip"""
-    skip: Int = 0
-
-    """Number of items to take"""
-    take: Int = 10
-  ): AttributeValueConnection!
-  attributeValuesByCode(args: GetAttributeValuesByCodeArgs!): AttributeValueConnection!
+  apiKeys: [ApiKeyEntity!]!
   channelByToken(token: String!): Channel
   channels(
     """Search query"""
@@ -306,34 +110,14 @@ type Query {
     """Number of items to take"""
     take: Int = 10
   ): ChannelConnection!
-  companies(
-    address: String
-    channelToken: ID
-    filters: [AttributeFilterInput!]
-
-    """Search query"""
-    searchQuery: String
-
-    """Number of items to skip"""
-    skip: Int = 0
-
-    """Number of items to take"""
-    take: Int = 10
-  ): CompanyConnection!
-  company(id: ID!): Company
-  companyNotes(
-    companyId: ID!
-
-    """Search query"""
-    searchQuery: String
-
-    """Number of items to skip"""
-    skip: Int = 0
-
-    """Number of items to take"""
-    take: Int = 10
-  ): CompanyConnectionNotes
+  getTranslations(language: String!, projectId: String!): TranslationsResponse!
+  getUser(id: String!): User!
+  getUserByEmail(email: String!): User!
+  getUsers(skip: Float!, take: Float!): UserConnection!
   me: User
+  project(id: String!): ProjectEntity
+  projects: [ProjectEntity!]!
+  translationKeys(projectId: String!): [TranslationKeyEntity!]!
 }
 
 input RegisterNewTenantInput {
@@ -350,48 +134,23 @@ input RegisterUserInput {
   password: String!
 }
 
-input UpdateAttributeGroupInput {
-  name: String!
-}
-
-input UpdateAttributeInput {
-  attributeTypeId: ID
-  meta: JSON
-  parentId: ID
-  value: String
-}
-
-input UpdateAttributeTypeInput {
-  availableFor: [AttributableType!]!
-  config: JSON
-  dataType: AttributeDataType!
-  groupId: ID
-  id: ID!
-  kind: AttributeTypeKind!
-  name: String!
-}
-
-input UpdateCompanyInput {
-  address: JSON
-
-  """
-  Hiyerarşik adres değerlerinin kodları (örn: ["turkiye", "izmir", "bornova"])
-  """
-  addressAttributeCodes: [String!]
-  attributeIds: [String!]
+type TranslationKeyEntity {
+  context: String
+  createdAt: DateTime!
   description: String
-  email: String
-  linkedinUrl: String
-  name: String
-  phoneNumber: String
-  socialProfiles: JSON
-  taxId: String
-  website: String
+  id: String!
+  isActive: Boolean!
+  key: String!
+  projectId: String!
+  updatedAt: DateTime!
 }
 
-input UpdateCompanyNoteInput {
-  content: String
-  type: String
+type TranslationsResponse {
+  language: String!
+  projectId: String!
+  totalKeys: Float!
+  translatedKeys: Float!
+  translations: JSON!
 }
 
 type User {
@@ -400,4 +159,9 @@ type User {
   id: ID!
   name: String
   updatedAt: DateTime
+}
+
+type UserConnection {
+  items: [User!]!
+  totalCount: Int!
 }

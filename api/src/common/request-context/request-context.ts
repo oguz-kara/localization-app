@@ -6,22 +6,27 @@ export interface CtxChannel {
 
 export interface CtxUser {
   id: string
-  name: string
-  email: string
+  name?: string
+  email?: string
 }
 
 export interface CtxJWTPayload {
   sub?: string
-  email?: string
   jti?: string
   exp?: number
   channelToken?: string
+}
+
+export interface CtxApiKey {
+  id: string
+  name: string
 }
 
 export interface RequestContextProps {
   channel: CtxChannel
   user?: CtxUser
   jwtPayload?: CtxJWTPayload
+  apiKey?: CtxApiKey
 }
 
 export class RequestContext {
@@ -30,11 +35,13 @@ export class RequestContext {
   private _channel: CtxChannel
   private readonly _user?: CtxUser
   private readonly _jwtPayload?: CtxJWTPayload
+  private readonly _apiKey?: CtxApiKey
 
   constructor(props: RequestContextProps) {
     this._channel = props.channel
     this._user = props.user
     this._jwtPayload = props.jwtPayload
+    this._apiKey = props.apiKey
   }
 
   static createInstance(props: RequestContextProps): RequestContext {
@@ -63,5 +70,13 @@ export class RequestContext {
 
   get jwtPayload(): CtxJWTPayload | undefined {
     return this._jwtPayload
+  }
+
+  get apiKey(): CtxApiKey | undefined {
+    return this._apiKey
+  }
+
+  get channelToken(): string | undefined {
+    return this._channel.token
   }
 }

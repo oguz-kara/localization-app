@@ -13,6 +13,7 @@ import { CommandModule } from 'nestjs-command'
 // Application modules
 import { AuthModule } from './modules/auth/auth.module'
 import { ChannelModule } from './modules/channel/channel.module'
+import { ProjectModule } from './modules/project/project.module'
 import { HealthModule } from './modules/health/health.module'
 import { SeederModule } from './seeder/seeder.module'
 
@@ -50,7 +51,7 @@ import { appConfig } from './common/config/app.config'
       playground: true,
       autoSchemaFile: 'schema.graphql',
       sortSchema: true,
-      include: [AuthModule, ChannelModule],
+      include: [AuthModule, ChannelModule, ProjectModule],
       formatError: (
         formattedError: GraphQLFormattedError,
         error: any,
@@ -103,6 +104,7 @@ import { appConfig } from './common/config/app.config'
     // Feature modules
     AuthModule,
     ChannelModule,
+    ProjectModule,
     HealthModule,
 
     // Utility modules

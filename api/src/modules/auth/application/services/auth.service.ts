@@ -80,8 +80,10 @@ export class AuthService {
       }
 
       const jwtSecret = this.configService.get<string>('JWT_SECRET')
-      const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION_TIME')
-      
+      const jwtExpiration = this.configService.get<string>(
+        'JWT_EXPIRATION_TIME',
+      )
+
       if (!jwtSecret) {
         throw new Error('JWT_SECRET is not configured')
       }
@@ -142,7 +144,7 @@ export class AuthService {
 
     const jwtSecret = this.configService.get<string>('JWT_SECRET')
     const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION_TIME')
-    
+
     if (!jwtSecret) {
       throw new Error('JWT_SECRET is not configured')
     }
@@ -191,7 +193,7 @@ export class AuthService {
     }
     const jwtSecret = this.configService.get<string>('JWT_SECRET')
     const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION_TIME')
-    
+
     if (!jwtSecret) {
       throw new Error('JWT_SECRET is not configured')
     }

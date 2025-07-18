@@ -35,7 +35,7 @@ export class ApiKeyService {
   ): Promise<ApiKeyResponse> {
     // Generate a secure random API key
     const apiKey = this.generateApiKey()
-    
+
     // Hash the API key for storage
     const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex')
 
@@ -44,14 +44,14 @@ export class ApiKeyService {
         name: input.name,
         description: input.description,
         keyHash,
-        channelToken: ctx.channelToken,
+        channelToken: ctx.channelToken!,
       },
     })
 
     return {
       id: createdApiKey.id,
       name: createdApiKey.name,
-      description: createdApiKey.description,
+      description: createdApiKey.description ?? undefined,
       key: apiKey, // Only return the plain key on creation
       isActive: createdApiKey.isActive,
       createdAt: createdApiKey.createdAt,
@@ -60,7 +60,7 @@ export class ApiKeyService {
 
   async getApiKeys(ctx: RequestContext): Promise<ApiKeyListItem[]> {
     const apiKeys = await this.prisma.apiKey.findMany({
-      where: { channelToken: ctx.channelToken },
+      where: { channelToken: ctx.channelToken! },
       select: {
         id: true,
         name: true,
@@ -71,12 +71,18 @@ export class ApiKeyService {
       orderBy: { createdAt: 'desc' },
     })
 
-    return apiKeys
+    return apiKeys.map((apiKey) => ({
+      id: apiKey.id,
+      name: apiKey.name,
+      description: apiKey.description ?? undefined,
+      isActive: apiKey.isActive,
+      createdAt: apiKey.createdAt,
+    }))
   }
 
   async revokeApiKey(ctx: RequestContext, id: string): Promise<boolean> {
     const apiKey = await this.prisma.apiKey.findFirst({
-      where: { id, channelToken: ctx.channelToken },
+      where: { id, channelToken: ctx.channelToken! },
     })
 
     if (!apiKey) {
@@ -93,7 +99,7 @@ export class ApiKeyService {
 
   async deleteApiKey(ctx: RequestContext, id: string): Promise<boolean> {
     const apiKey = await this.prisma.apiKey.findFirst({
-      where: { id, channelToken: ctx.channelToken },
+      where: { id, channelToken: ctx.channelToken! },
     })
 
     if (!apiKey) {
@@ -108,7 +114,6 @@ export class ApiKeyService {
   }
 
   private generateApiKey(): string {
-    // Generate a 32-byte random key and encode it as base64
     const randomBytes = crypto.randomBytes(32)
     return `lm_${randomBytes.toString('base64').replace(/[+/]/g, '_').replace(/=/g, '')}`
   }

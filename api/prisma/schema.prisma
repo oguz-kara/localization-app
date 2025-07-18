@@ -8,6 +8,12 @@ datasource db {
 }
 
 // Enums
+enum TranslationStatus {
+  UNTRANSLATED
+  MACHINE_TRANSLATED
+  IN_REVIEW
+  APPROVED
+}
 
 // Models
 
@@ -43,8 +49,9 @@ model Channel {
   updatedAt DateTime @updatedAt
 
   // Relations - Core
-  users   User[]
-  apiKeys ApiKey[]
+  users    User[]
+  apiKeys  ApiKey[]
+  projects Project[]
 }
 
 model ApiKey {
@@ -66,4 +73,128 @@ model ApiKey {
   updatedAt DateTime @updatedAt
 
   @@index([channelToken])
+}
+
+model Project {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  name        String
+  description String?
+  slug        String
+  isActive    Boolean @default(true)
+
+  // Relations - Required channel relation for data siloing
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  // Relations - Localization
+  translationKeys TranslationKey[]
+  languages       ProjectLanguage[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([slug, channelToken])
+  @@index([channelToken])
+}
+
+model Language {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  code        String  @unique // ISO 639-1 code (e.g., "en", "es", "fr")
+  name        String  @unique // Display name (e.g., "English", "Spanish", "French")
+  nativeName  String? // Native name (e.g., "English", "Español", "Français")
+  isActive    Boolean @default(true)
+
+  // Relations
+  projects     ProjectLanguage[]
+  translations Translation[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+}
+
+model ProjectLanguage {
+  // Composite Primary Key
+  projectId  String
+  languageId String
+
+  // Relations
+  project  Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  language Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  // Basic Fields
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([projectId, languageId])
+  @@index([projectId])
+  @@index([languageId])
+}
+
+model TranslationKey {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  key         String // The translation key (e.g., "buttons.submit", "welcome.message")
+  description String? // Developer notes about the key
+  context     String? // Usage context or screenshots
+  isActive    Boolean @default(true)
+
+  // Relations - Required project relation
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Relations - Translations
+  translations Translation[]
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, projectId])
+  @@index([projectId])
+  @@index([key])
+}
+
+model Translation {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  value  String
+  status TranslationStatus @default(UNTRANSLATED)
+  
+  // Translation metadata
+  machineTranslated Boolean @default(false)
+  reviewNotes       String?
+  
+  // Relations - Required relations
+  translationKeyId String
+  translationKey   TranslationKey @relation(fields: [translationKeyId], references: [id], onDelete: Cascade)
+  
+  languageId String
+  language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([translationKeyId, languageId])
+  @@index([translationKeyId])
+  @@index([languageId])
+  @@index([status])
 }

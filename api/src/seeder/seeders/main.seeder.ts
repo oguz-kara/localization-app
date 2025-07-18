@@ -15,8 +15,7 @@ export class MainSeeder {
 
   @Command({
     command: 'seed:all',
-    describe:
-      'Seeds the database with initial data like users, channels, etc.',
+    describe: 'Seeds the database with initial data like users, channels, etc.',
   })
   async runAll() {
     this.logger.log('--- STARTING ALL SEEDERS ---')
@@ -29,7 +28,8 @@ export class MainSeeder {
 
   @Command({
     command: 'delete:all',
-    describe: 'Deletes the database with initial data like users, channels, etc.',
+    describe:
+      'Deletes the database with initial data like users, channels, etc.',
   })
   async deleteAll() {
     this.logger.log('--- STARTING DELETE ALL SEEDERS ---')
