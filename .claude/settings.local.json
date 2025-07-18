@@ -8,7 +8,11 @@
       "Bash(DATABASE_URL=\"postgresql://postgres:4784961Edc!@localhost:5433/localization_dev?schema=public\" npx prisma migrate dev --name remove-company-attribute-models)",
       "Bash(docker-compose up:*)",
       "Bash(mkdir:*)",
-      "WebFetch(domain:docs.vendure.io)"
+      "WebFetch(domain:docs.vendure.io)",
+      "Bash(npx prisma db pull:*)",
+      "Bash(npm run:*)",
+      "Bash(npx tsc:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }

@@ -239,10 +239,19 @@ switch (result.createProject.__typename) {
 - Client-side conditional fragments for error handling
 
 ### Security
-- JWT-based user authentication
-- API key authentication for service-to-service
-- Tenant-based data isolation
+- JWT-based user authentication with minimalist payload (sub, jti, channelToken)
+- API key authentication for service-to-service with SHA-256 hashing
+- Dual authentication support (JWT + API key) via FlexibleAuthGuard
+- Tenant-based data isolation via channelToken
 - Input validation with class-validator
+- Fail-fast JWT configuration (no fallback secrets)
+- BCrypt password hashing with salt rounds 10
+
+### Authentication Guards
+- `@ProtectResource()` - JWT authentication only
+- `@ProtectResourceApiKey()` - API key authentication only  
+- `@ProtectResourceFlexible()` - Either JWT or API key authentication
+- All sensitive resolvers must use one of these guards
 
 ## Database Ports
 - Main DB: localhost:5433
