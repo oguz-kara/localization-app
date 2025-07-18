@@ -11,11 +11,11 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@gocrm/components",
-    "utils": "@gocrm/lib/utils",
-    "ui": "@gocrm/components/ui",
-    "lib": "@gocrm/lib",
-    "hooks": "@gocrm/hooks"
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
   },
   "iconLibrary": "lucide"
 }

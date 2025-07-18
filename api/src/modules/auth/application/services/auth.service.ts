@@ -172,6 +172,8 @@ export class AuthService {
     ctx: RequestContext,
     loginUserInput: LoginUserInput,
   ): Promise<AuthenticationPayloadObject> {
+    console.log('loginUserInput', loginUserInput)
+    console.log('ctx', ctx)
     const { email, password } = loginUserInput
 
     const user = await this.prisma.user.findUnique({

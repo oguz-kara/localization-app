@@ -2,13 +2,39 @@
 import NextAuth, { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import { GraphQLClient } from 'graphql-request'
-import { loginMutationGql } from '@gocrm/features/auth/gql/documents/login.mutation-gql'
-import { LoginUserMutation } from '@gocrm/graphql/generated/hooks'
 
 type User = {
   id: string
   email: string
   accessToken: string
+}
+
+// GraphQL response types
+type LoginSuccess = {
+  __typename: 'LoginSuccess'
+  user: {
+    id: string
+    email: string
+  }
+  token: string
+}
+
+type InvalidCredentialsError = {
+  __typename: 'InvalidCredentialsError'
+  errorCode: string
+  message: string
+}
+
+type LoginResponse = {
+  loginUser: LoginSuccess | InvalidCredentialsError
+}
+
+// Type guard to check if response is LoginSuccess
+function isLoginSuccess(
+  response: any,
+): response is LoginResponse & { loginUser: LoginSuccess } {
+  console.log({ response })
+  return Boolean(response?.loginUser?.token)
 }
 
 const authOptions: NextAuthOptions = {
@@ -21,18 +47,31 @@ const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        console.log({ credentials })
         if (!credentials?.email || !credentials?.password) {
           return null
         }
 
         const authApiClient = new GraphQLClient(
-          process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
-            'http://localhost:3001/admin-api',
+          'http://localhost:3000/admin-api',
         )
 
         try {
-          const data = await authApiClient.request<LoginUserMutation>(
-            loginMutationGql,
+          const loginMutation = `
+            mutation LoginUser($input: LoginUserInput!) {
+              loginUser(loginUserInput: $input) {
+                token
+                user {
+                  id
+                  email
+                  name
+                }
+              }
+            }
+          `
+
+          const response = await authApiClient.request<LoginResponse>(
+            loginMutation,
             {
               input: {
                 email: credentials.email,
@@ -41,19 +80,19 @@ const authOptions: NextAuthOptions = {
             },
           )
 
-          const loginResult = data.loginUser
-          if (loginResult && loginResult.token) {
+          console.log({ response })
+
+          if (isLoginSuccess(response)) {
             return {
-              id: loginResult.user.id,
-              name: loginResult.user.name,
-              email: loginResult.user.email,
-              accessToken: loginResult.token,
+              id: response.loginUser.user.id,
+              email: response.loginUser.user.email,
+              accessToken: response.loginUser.token,
             }
           }
+
           return null
         } catch (error) {
           console.error('Authorize error:', error)
-          // Hata durumunda null dönerek login işleminin başarısız olduğunu belirtiyoruz.
           return null
         }
       },

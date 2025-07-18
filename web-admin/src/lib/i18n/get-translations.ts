@@ -1,5 +1,5 @@
 import 'server-only'
-import { tr, Translations } from '@gocrm/lib/i18n/tr'
+import { tr, Translations } from '@/lib/i18n/tr'
 
 const dictionaries = {
   tr,

@@ -9,9 +9,8 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from '@gocrm/components/ui/pagination'
+} from '@/components/ui/pagination'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useTranslations } from '@gocrm/hooks/use-translations'
 
 interface AppPaginationProps {
   totalCount: number
@@ -24,14 +23,12 @@ export const AppPagination = ({
   pageSize,
   currentPage,
 }: AppPaginationProps) => {
-  const { translations } = useTranslations()
   const pathname = usePathname()
   const searchParams = useSearchParams()
-  const t = translations?.pagination
 
   const totalPages = Math.ceil(totalCount / pageSize)
 
-  if (totalPages <= 1 || !t) {
+  if (totalPages <= 1) {
     return null // Eğer sadece bir sayfa varsa veya çeviriler yüklenmediyse paginasyonu gösterme
   }
 
@@ -75,13 +72,14 @@ export const AppPagination = ({
         <PaginationItem>
           <PaginationPrevious
             href={createPageURL(currentPage - 1)}
+            size="sm"
             aria-disabled={currentPage <= 1}
             tabIndex={currentPage <= 1 ? -1 : undefined}
             className={
               currentPage <= 1 ? 'pointer-events-none opacity-50' : undefined
             }
           >
-            {t.previous}
+            Previous
           </PaginationPrevious>
         </PaginationItem>
 
@@ -90,6 +88,7 @@ export const AppPagination = ({
             <PaginationItem key={`${page}-${index}`}>
               <PaginationLink
                 href={createPageURL(page)}
+                size="sm"
                 isActive={currentPage === page}
               >
                 {page}
@@ -105,6 +104,7 @@ export const AppPagination = ({
         <PaginationItem>
           <PaginationNext
             href={createPageURL(currentPage + 1)}
+            size="sm"
             aria-disabled={currentPage >= totalPages}
             tabIndex={currentPage >= totalPages ? -1 : undefined}
             className={
@@ -113,7 +113,7 @@ export const AppPagination = ({
                 : undefined
             }
           >
-            {t.next}
+            Next
           </PaginationNext>
         </PaginationItem>
       </PaginationContent>

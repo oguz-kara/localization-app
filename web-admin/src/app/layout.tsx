@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'GoCRM',
-  description: 'GoCRM',
+  title: 'LocalizeApp',
+  description: 'Multi-tenant localization management platform',
 }
 
 export default function RootLayout({

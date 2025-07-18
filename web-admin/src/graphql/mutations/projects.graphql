@@ -1,0 +1,15 @@
+mutation CreateProject($input: CreateProjectInput!) {
+  createProject(input: $input) {
+    id
+    name
+    description
+    slug
+    isActive
+    channelToken
+    createdAt
+    updatedAt
+  }
+}
+
+# NOTE: Project update/delete operations are not available in the current backend
+# Only createProject mutation exists currently

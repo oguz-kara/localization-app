@@ -5,8 +5,8 @@ import {
   MoreHorizontalIcon,
 } from 'lucide-react'
 
-import { cn } from '@gocrm/lib/utils'
-import { Button, buttonVariants } from '@gocrm/components/ui/button'
+import { cn } from '@/lib/utils'
+import { Button, buttonVariants } from '@/components/ui/button'
 import Link from '../common/link'
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {

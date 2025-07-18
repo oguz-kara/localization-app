@@ -31,7 +31,7 @@ export const Ctx = createParamDecorator(
         token: user?.channelToken || undefined,
       },
       user: {
-        id: user.id,
+        id: user?.id ?? undefined,
       },
     })
   },

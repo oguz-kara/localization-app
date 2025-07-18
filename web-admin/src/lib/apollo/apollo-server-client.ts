@@ -7,13 +7,11 @@ import {
   ApolloClient,
   InMemoryCache,
 } from '@apollo/client-integration-nextjs'
-import { i18n } from '@gocrm/lib/i18n'
+import { i18n } from '@/lib/i18n'
 
 export const { getClient } = registerApolloClient(async () => {
   const httpLink = new HttpLink({
-    uri:
-      process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
-      'http://localhost:3001/api/graphql',
+    uri: '/api/graphql',
   })
 
   const middlewareLink = new ApolloLink((operation, forward) => {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRoutesContext } from '@gocrm/contexts/routes-context'
+import { useRoutesContext } from '@/contexts/routes-context'
 
 export const useRoutes = () => {
   const { routes, isLoading } = useRoutesContext()

@@ -1,0 +1,41 @@
+mutation CreateTranslationKey($input: CreateTranslationKeyInput!) {
+  createTranslationKey(input: $input) {
+    id
+    key
+    description
+    context
+    isActive
+    projectId
+    createdAt
+    updatedAt
+  }
+}
+
+mutation SyncTranslations($input: SyncTranslationsInput!) {
+  syncTranslations(input: $input) {
+    jobId
+    message
+    success
+    estimatedDuration
+    totalKeys
+    totalLanguages
+  }
+}
+
+mutation ExportTranslations($input: ExportTranslationsInput!) {
+  exportTranslations(input: $input) {
+    jobId
+    message
+    status
+    downloadUrl
+  }
+}
+
+mutation ImportTranslations($input: ImportTranslationsInput!) {
+  importTranslations(input: $input) {
+    jobId
+    message
+    status
+    totalKeys
+  }
+}

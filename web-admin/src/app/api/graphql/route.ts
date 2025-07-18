@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
   }
 
   const coreApiUrl =
-    process.env.NEXT_PUBLIC_ADMIN_GRAPHQL_API_URL ||
-    'http://localhost:3001/admin-api'
+    process.env.NEXT_PUBLIC_APP_GRAPHQL_API_URL ||
+    'http://localhost:3000/admin-api'
 
   try {
     const response = await fetch(coreApiUrl, {

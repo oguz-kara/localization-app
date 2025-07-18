@@ -1,4 +1,4 @@
-import { Skeleton } from '@gocrm/components/ui/skeleton'
+import { Skeleton } from '@/components/ui/skeleton'
 
 export const TableSkeleton = () => (
   <div className="space-y-2">

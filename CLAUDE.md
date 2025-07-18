@@ -261,3 +261,101 @@ switch (result.createProject.__typename) {
 ## Environment Variables Required
 Backend requires: `DATABASE_URL`, `JWT_SECRET`, `JWT_EXPIRATION_TIME`, `OPENAI_API_KEY`
 Frontend requires: `NEXT_PUBLIC_APP_GRAPHQL_API_URL`
+
+## UI Design Principles
+
+### 1. Clarity is King: The Primacy of Text
+
+The most important "data" in this application is the translation string itself. The UI must present it with absolute clarity.
+
+- **Hierarchy through Typography**: The translation key, source text, and target input field are the visual centerpiece. Use font weight and color to establish hierarchy, not boxes or containers.
+
+- **Whitespace is Structure**: Employ generous whitespace to create a breathable layout, especially in data-heavy grids, to prevent a cramped, overwhelming feel.
+
+- **Subtle Status Indicators**: Use colored dots or shadcn/ui badges to convey status (e.g., In Review, Approved). This is more scannable and takes up less space than text labels.
+
+### 2. Motion as Feedback, Not Fanfare
+
+Animation must be purposeful, directly confirming a user's action or clarifying a change in state.
+
+- **State Transitions**: Use subtle animations (GSAP) to highlight status changes. An approved key might briefly flash a green border.
+
+- **Bulk Action Feedback**: Asynchronous actions (e.g., machine-translating 50 keys) must provide clear feedback, like a progress bar in a fixed position.
+
+- **Micro-interactions**: Use Lottie for hover states on critical icons (save, copy) and form feedback.
+
+### 3. Progressive Disclosure of Information
+
+Default to showing less. The user should only see what they need for the immediate task to avoid information overload.
+
+- **The "Matrix" is Primary**: The main translation interface is a clean grid of keys and languages.
+
+- **Context on Demand**: Developer notes, version history, and screenshots are secondary information. They must be hidden by default and revealed (via a side panel or popover) only when the user explicitly requests them by clicking an icon.
+
+### 4. Trust Through Unambiguous Transparency
+
+The user must trust the tool, especially with the involvement of AI. There can be no ambiguity.
+
+- **Visually Distinguish AI Content**: All machine-generated translations must be clearly marked with a unique icon (e.g., a "spark" or "robot") and/or a distinct text color.
+
+- **Visible Audit Trail**: The "who, what, and when" of every change must be instantly accessible in a clean, readable "History" view for each translation.
+
+### Application of Advanced Techniques
+
+- **GSAP Animations**: For UI state transitions only (e.g., side panel slide-in, status pulses, progress bars). Not for initial page load animations.
+
+- **Lottie**: For interactive feedback on small, critical elements (icon hovers, validation states).
+
+- **Recharts**: For data visualization on the high-level Dashboard page only. The main translation workbench must remain free of charts.
+
+- **Three.js**: Forbidden for the current scope. It does not serve the core user workflow.
+
+### Forbidden Patterns
+
+- **No Ambiguous States**: It must be instantly obvious if a translation is human-approved, in review, or machine-generated.
+
+- **No Modal-Heavy Workflows**: Prioritize inline editing for translations. Modals interrupt flow and are reserved for system-level actions (e.g., "Confirm Deletion").
+
+- **No Visual Noise Near Text Inputs**: The area where a user types must be sacrosanct and free of distracting elements or animations.
+
+- **No Decorative Motion**: If an animation doesn't provide feedback or clarify a state change, it's forbidden.
+
+- **No Scroll Hijacking or decorative scroll-based animations**.
+
+### Component Architecture
+
+- **Base**: shadcn/ui. This is our default toolkit for buttons, tables, badges, tabs, etc.
+
+- **Core Components**: The application is built around three primary, purpose-built components:
+
+  - **The Translation Grid**: The main inline-editing interface.
+
+  - **The Key Details Panel**: The slide-in panel for on-demand context (Notes, History).
+
+  - **The Project Dashboard Widget**: The Recharts-powered summary component for the overview page.
+
+### Decision Framework
+
+Before adding any new component or visual effect, confirm it meets these four criteria:
+
+1. Does this reduce the user's cognitive load?
+
+2. Does this clarify status or provide essential context?
+
+3. Is this technique applied consistently for this type of interaction across the app?
+
+4. Would this help a professional do their job faster and with more confidence?
+
+If the answer to any of these is "no," the proposed change must be rejected.
+
+## GraphQL Data Fetching Standards
+
+### Server Components
+- **ALWAYS** use `@/graphql/index.ts` for data fetching in server components
+- **NEVER** use Apollo Client directly in server components
+- Import and use: `import { sdk } from '@/graphql'` then `const api = sdk()`
+- This ensures consistent authentication handling and proper server-side rendering
+
+### Client Components  
+- Use Apollo Client hooks from generated hooks file: `@/graphql/generated/hooks.ts`
+- Use the Apollo Provider for client-side data fetching and mutations

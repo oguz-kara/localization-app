@@ -9,7 +9,7 @@ import {
 } from '@apollo/client-integration-nextjs'
 import { signOut } from 'next-auth/react'
 import { onError } from '@apollo/client/link/error'
-import { GraphQLError } from '@gocrm/types/graphql-error.type'
+import { GraphQLError } from '@/types/graphql-error.type'
 
 // makeClient fonksiyonu artık herhangi bir React hook'una bağlı değil,
 // bu yüzden component'in dışında tanımlanabilir. Bu, her render'da yeniden oluşmasını engeller.

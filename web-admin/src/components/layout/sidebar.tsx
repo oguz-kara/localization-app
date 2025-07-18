@@ -1,38 +1,73 @@
-// src/components/layout/sidebar.tsx
 'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { cn } from '@gocrm/lib/utils'
-import { navigationHierarchy } from '@gocrm/constants/navigation-hierarchy'
+import { cn } from '@/lib/utils'
+import { 
+  LayoutDashboard, 
+  FolderOpen, 
+  Settings, 
+  Globe
+} from 'lucide-react'
 
-interface SidebarProps {
-  className?: string
-  onLinkClick?: () => void // Mobil menüde linke tıklanınca menüyü kapatmak için
-}
+const navigation = [
+  {
+    name: 'Dashboard',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+  },
+  {
+    name: 'Projects',
+    href: '/projects',
+    icon: FolderOpen,
+  },
+  {
+    name: 'Settings',
+    href: '/settings',
+    icon: Settings,
+  },
+]
 
-// Komponenti artık dışarıdan gelen class'ları ve bir callback fonksiyonunu alacak şekilde güncelleyelim.
-export default function Sidebar({ className, onLinkClick }: SidebarProps) {
+export function Sidebar() {
   const pathname = usePathname()
 
   return (
-    <nav className={cn('flex flex-col gap-2 text-lg font-medium', className)}>
-      {navigationHierarchy.map((link) => (
-        <Link
-          key={link.label}
-          href={link.href}
-          onClick={onLinkClick} // Linke tıklandığında bu fonksiyonu çağır
-          className={cn(
-            'flex items-center gap-4 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
-            {
-              'bg-muted text-primary': pathname.startsWith(link.href), // Aktif linki vurgulama
-            },
-          )}
-        >
-          <link.icon className="h-5 w-5" />
-          {link.label}
-        </Link>
-      ))}
-    </nav>
+    <div className="flex h-full w-64 flex-col bg-white border-r border-gray-200">
+      {/* Logo */}
+      <div className="flex h-16 items-center px-6 border-b border-gray-200">
+        <div className="flex items-center space-x-2">
+          <Globe className="h-8 w-8 text-blue-600" />
+          <span className="text-xl font-semibold text-gray-900">LocalizeApp</span>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 space-y-1 px-3 py-4">
+        {navigation.map((item) => {
+          const isActive = pathname.startsWith(item.href)
+          
+          return (
+            <Link
+              key={item.name}
+              href={item.href}
+              className={cn(
+                'group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
+                isActive
+                  ? 'bg-blue-50 text-blue-700'
+                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+              )}
+            >
+              <item.icon
+                className={cn(
+                  'mr-3 h-5 w-5 flex-shrink-0',
+                  isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
+                )}
+              />
+              {item.name}
+            </Link>
+          )
+        })}
+      </nav>
+    </div>
   )
 }

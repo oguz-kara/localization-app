@@ -1,5 +1,5 @@
 import 'server-only'
-import { Routes, routes } from '@gocrm/constants/routes'
+import { Routes, routes } from '@/constants/routes'
 
 export const getRoutes = async (): Promise<Routes> => {
   await Promise.resolve()

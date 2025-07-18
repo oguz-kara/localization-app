@@ -1,14 +1,14 @@
 // src/graphql/requester.ts
 import 'server-only'
-import { getSdk, Requester } from '@gocrm/graphql/generated/sdk'
+import { getSdk, Requester } from '@/graphql/generated/sdk'
 import { DocumentNode } from 'graphql'
-import { i18n } from '@gocrm/lib/i18n'
+import { i18n } from '@/lib/i18n'
 import { getToken } from 'next-auth/jwt'
 import { headers as getHeaders } from 'next/headers'
 import { NextRequest } from 'next/server'
 import { OperationVariables } from '@apollo/client'
-import { AuthError } from '@gocrm/lib/errors/errors/auth-error'
-import { GraphQLError } from '@gocrm/types/graphql-error.type'
+import { AuthError } from '@/lib/errors/errors/auth-error'
+import { GraphQLError } from '@/types/graphql-error.type'
 
 const requester = async <TData, TVariables extends OperationVariables>(
   doc: DocumentNode,
