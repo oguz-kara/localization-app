@@ -6,8 +6,10 @@ import { TranslationService } from './application/services/translation.service'
 import { ProjectResolver } from './api/graphql/resolvers/project.resolver'
 import { TranslationKeyResolver } from './api/graphql/resolvers/translation-key.resolver'
 import { TranslationResolver } from './api/graphql/resolvers/translation.resolver'
+import { JobsModule } from '../jobs/jobs.module'
 
 @Module({
+  imports: [JobsModule],
   providers: [
     PrismaService,
     ProjectService,

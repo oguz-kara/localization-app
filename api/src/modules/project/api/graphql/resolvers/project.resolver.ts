@@ -5,6 +5,8 @@ import { ProtectResource } from 'src/common/decorators/protect-resource.decorato
 import { ProjectService } from 'src/modules/project/application/services/project.service'
 import { ProjectEntity } from '../entities/project.entity'
 import { CreateProjectInput } from '../dto/create-project.input'
+import { SyncTranslationsInput } from '../dto/sync-translations.input'
+import { SyncTranslationsResult } from '../dto/sync-translations.output'
 
 @Resolver(() => ProjectEntity)
 export class ProjectResolver {
@@ -32,5 +34,14 @@ export class ProjectResolver {
     @Args('input') input: CreateProjectInput,
   ): Promise<ProjectEntity> {
     return this.projectService.createProject(ctx, input)
+  }
+
+  @Mutation(() => SyncTranslationsResult, { name: 'syncTranslations' })
+  @ProtectResource()
+  async syncTranslations(
+    @Ctx() ctx: RequestContext,
+    @Args('input') input: SyncTranslationsInput,
+  ): Promise<SyncTranslationsResult> {
+    return this.projectService.syncTranslations(ctx, input)
   }
 }

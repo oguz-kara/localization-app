@@ -1,0 +1,25 @@
+# Development overrides
+version: '3.8'
+
+services:
+  localization-worker:
+    # Override for development - mount source code for live reloading
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+    command: pnpm run worker
+    environment:
+      - NODE_ENV=development
+      - LOG_LEVEL=debug
+    
+  # Optional: Add a Redis CLI container for debugging
+  redis-cli:
+    image: redis:7.2-alpine
+    container_name: localization-redis-cli
+    depends_on:
+      - localization-redis
+    command: redis-cli -h localization-redis -p 6379 -a my_strong_password
+    networks:
+      - localization-network
+    profiles:
+      - debug

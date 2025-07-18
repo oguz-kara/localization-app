@@ -16,6 +16,7 @@ import { ChannelModule } from './modules/channel/channel.module'
 import { ProjectModule } from './modules/project/project.module'
 import { HealthModule } from './modules/health/health.module'
 import { SeederModule } from './seeder/seeder.module'
+import { JobsModule } from './modules/jobs/jobs.module'
 
 // Application config
 import { appConfig } from './common/config/app.config'
@@ -51,7 +52,7 @@ import { appConfig } from './common/config/app.config'
       playground: true,
       autoSchemaFile: 'schema.graphql',
       sortSchema: true,
-      include: [AuthModule, ChannelModule, ProjectModule],
+      include: [AuthModule, ChannelModule, ProjectModule, JobsModule],
       formatError: (
         formattedError: GraphQLFormattedError,
         error: any,
@@ -106,6 +107,7 @@ import { appConfig } from './common/config/app.config'
     ChannelModule,
     ProjectModule,
     HealthModule,
+    JobsModule,
 
     // Utility modules
     SeederModule,
