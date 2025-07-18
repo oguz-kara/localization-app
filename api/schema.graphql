@@ -73,6 +73,27 @@ input ExportTranslationsInput {
   projectId: String!
 }
 
+type FailedJobOutput {
+  attemptsMade: Float!
+  createdAt: DateTime!
+  data: JSON!
+  failedAt: DateTime!
+  failedReason: String!
+  finishedOn: Float
+  id: String!
+  maxAttempts: Float!
+  name: String!
+  processedOn: Float
+}
+
+type FailedJobStatsOutput {
+  jobsByFailureReason: JSON!
+  jobsByType: JSON!
+  newestFailedJob: DateTime
+  oldestFailedJob: DateTime
+  totalFailed: Float!
+}
+
 enum ImportExportFormat {
   JSON
   YAML
@@ -108,6 +129,7 @@ type LogoutOutput {
 }
 
 type Mutation {
+  cleanupOldFailedJobs(olderThanDays: Float! = 30): RetryJobResult!
   createApiKey(input: CreateApiKeyInput!): ApiKeyEntity!
   createChannel(createChannelInput: CreateChannelInput!): Channel!
   createProject(input: CreateProjectInput!): ProjectEntity!
@@ -119,7 +141,11 @@ type Mutation {
   logoutUser: LogoutOutput!
   registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!
   registerUser(channelToken: String!, registerUserInput: RegisterUserInput!): AuthenticationPayload!
+  removeFailedJob(jobId: String!): RetryJobResult!
+  retryFailedJob(jobId: String!): RetryJobResult!
+  retryFailedJobsByType(jobType: String!): RetryJobResult!
   revokeApiKey(id: String!): Boolean!
+  syncTranslations(input: SyncTranslationsInput!): SyncTranslationsResult!
 }
 
 type ProjectEntity {
@@ -146,6 +172,9 @@ type Query {
     """Number of items to take"""
     take: Int = 10
   ): ChannelConnection!
+  failedJob(jobId: String!): FailedJobOutput
+  failedJobStats: FailedJobStatsOutput!
+  failedJobs: [FailedJobOutput!]!
   getTranslations(language: String!, projectId: String!): TranslationsResponse!
   getUser(id: String!): User!
   getUserByEmail(email: String!): User!
@@ -168,6 +197,36 @@ input RegisterUserInput {
   email: String!
   name: String!
   password: String!
+}
+
+type RetryJobResult {
+  jobId: String
+  message: String!
+  success: Boolean!
+}
+
+input SyncTranslationsInput {
+  projectId: String
+  sourceLanguage: String!
+  sourceText: String
+  targetLanguage: String
+  targetLanguages: [String!]
+  translationKeyId: String
+  type: SyncTranslationsType!
+}
+
+type SyncTranslationsResult {
+  estimatedDuration: Float
+  jobId: String!
+  message: String
+  success: Boolean!
+  totalKeys: Float
+  totalLanguages: Float
+}
+
+enum SyncTranslationsType {
+  PROJECT
+  SINGLE_KEY
 }
 
 type TranslationKeyEntity {

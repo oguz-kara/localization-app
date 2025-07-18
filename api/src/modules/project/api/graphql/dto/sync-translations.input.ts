@@ -1,44 +1,48 @@
-import { InputType, Field } from '@nestjs/graphql';
-import { IsString, IsArray, IsOptional, IsEnum } from 'class-validator';
+import { InputType, Field, registerEnumType } from '@nestjs/graphql'
+import { IsString, IsArray, IsOptional, IsEnum } from 'class-validator'
 
 export enum SyncTranslationsType {
   PROJECT = 'PROJECT',
   SINGLE_KEY = 'SINGLE_KEY',
 }
 
+registerEnumType(SyncTranslationsType, {
+  name: 'SyncTranslationsType',
+})
+
 @InputType()
 export class SyncTranslationsInput {
   @Field(() => SyncTranslationsType)
   @IsEnum(SyncTranslationsType)
-  type: SyncTranslationsType;
+  type: SyncTranslationsType
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  projectId?: string;
+  projectId?: string
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  translationKeyId?: string;
+  translationKeyId?: string
 
   @Field()
   @IsString()
-  sourceLanguage: string;
+  sourceLanguage: string
 
   @Field(() => [String], { nullable: true })
   @IsArray()
   @IsString({ each: true })
   @IsOptional()
-  targetLanguages?: string[];
+  targetLanguages?: string[]
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  targetLanguage?: string;
+  targetLanguage?: string
 
   @Field({ nullable: true })
   @IsString()
   @IsOptional()
-  sourceText?: string;
+  sourceText?: string
 }

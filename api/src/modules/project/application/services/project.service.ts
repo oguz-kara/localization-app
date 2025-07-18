@@ -3,7 +3,10 @@ import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { CreateProjectInput } from '../../api/graphql/dto/create-project.input'
 import { ProjectEntity } from '../../api/graphql/entities/project.entity'
-import { SyncTranslationsInput, SyncTranslationsType } from '../../api/graphql/dto/sync-translations.input'
+import {
+  SyncTranslationsInput,
+  SyncTranslationsType,
+} from '../../api/graphql/dto/sync-translations.input'
 import { SyncTranslationsResult } from '../../api/graphql/dto/sync-translations.output'
 import { TranslationQueueService } from 'src/modules/jobs/application/services/translation-queue.service'
 import {
@@ -149,7 +152,7 @@ export class ProjectService {
       throw new AccessDeniedException('Channel token required')
     }
 
-    if (!ctx.userId) {
+    if (!ctx.user?.id) {
       throw new AccessDeniedException('User ID required')
     }
 
@@ -183,19 +186,21 @@ export class ProjectService {
     })
 
     // Queue the job
-    const jobId = await this.translationQueueService.queueSyncProjectTranslations({
-      projectId: input.projectId,
-      sourceLanguage: input.sourceLanguage,
-      targetLanguages: input.targetLanguages,
-      channelToken: ctx.channelToken,
-      userId: ctx.userId,
-    })
+    const jobId =
+      await this.translationQueueService.queueSyncProjectTranslations({
+        projectId: input.projectId,
+        sourceLanguage: input.sourceLanguage,
+        targetLanguages: input.targetLanguages,
+        channelToken: ctx.channel.token!,
+        userId: ctx.user?.id || '',
+      })
 
     return {
       success: true,
       jobId,
       message: `Translation sync job queued for project ${input.projectId}`,
-      estimatedDuration: translationKeysCount * input.targetLanguages.length * 2, // ~2 seconds per translation
+      estimatedDuration:
+        translationKeysCount * input.targetLanguages.length * 2, // ~2 seconds per translation
       totalKeys: translationKeysCount,
       totalLanguages: input.targetLanguages.length,
     }
@@ -206,7 +211,9 @@ export class ProjectService {
     input: SyncTranslationsInput,
   ): Promise<SyncTranslationsResult> {
     if (!input.translationKeyId) {
-      throw new Error('Translation key ID is required for single translation sync')
+      throw new Error(
+        'Translation key ID is required for single translation sync',
+      )
     }
 
     if (!input.targetLanguage) {
@@ -228,18 +235,23 @@ export class ProjectService {
     })
 
     if (!translationKey) {
-      throw new EntityNotFoundException('Translation key', input.translationKeyId)
+      throw new EntityNotFoundException(
+        'Translation key',
+        input.translationKeyId,
+      )
     }
 
     // Queue the job
-    const jobId = await this.translationQueueService.queueSyncSingleTranslation({
-      translationKeyId: input.translationKeyId,
-      sourceLanguage: input.sourceLanguage,
-      targetLanguage: input.targetLanguage,
-      sourceText: input.sourceText,
-      channelToken: ctx.channelToken,
-      userId: ctx.userId,
-    })
+    const jobId = await this.translationQueueService.queueSyncSingleTranslation(
+      {
+        translationKeyId: input.translationKeyId,
+        sourceLanguage: input.sourceLanguage,
+        targetLanguage: input.targetLanguage,
+        sourceText: input.sourceText,
+        channelToken: ctx.channel.token!,
+        userId: ctx.user?.id || '',
+      },
+    )
 
     return {
       success: true,

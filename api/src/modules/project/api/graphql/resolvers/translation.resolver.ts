@@ -5,7 +5,12 @@ import { ProtectResourceFlexible } from 'src/common/decorators/protect-resource-
 import { ProtectResourceRoles } from 'src/common/decorators/protect-resource-roles.decorator'
 import { TranslationService } from 'src/modules/project/application/services/translation.service'
 import { TranslationsResponse } from '../entities/translations-response.entity'
-import { ImportTranslationsInput, ExportTranslationsInput, ImportResult, ExportResult } from '../entities/import-export.entity'
+import {
+  ImportTranslationsInput,
+  ExportTranslationsInput,
+  ImportResult,
+  ExportResult,
+} from '../entities/import-export.entity'
 import { UserRole } from '@prisma/client'
 
 @Resolver(() => TranslationsResponse)
