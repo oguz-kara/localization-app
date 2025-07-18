@@ -59,6 +59,40 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type ExportResult {
+  downloadUrl: String
+  jobId: ID!
+  message: String!
+  status: String!
+}
+
+input ExportTranslationsInput {
+  description: String
+  format: ImportExportFormat!
+  languageCode: String!
+  projectId: String!
+}
+
+enum ImportExportFormat {
+  JSON
+  YAML
+}
+
+type ImportResult {
+  jobId: ID!
+  message: String!
+  status: String!
+  totalKeys: Float!
+}
+
+input ImportTranslationsInput {
+  description: String
+  format: ImportExportFormat!
+  languageCode: String!
+  projectId: String!
+  translations: JSON!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -79,6 +113,8 @@ type Mutation {
   createProject(input: CreateProjectInput!): ProjectEntity!
   createTranslationKey(input: CreateTranslationKeyInput!): TranslationKeyEntity!
   deleteApiKey(id: String!): Boolean!
+  exportTranslations(input: ExportTranslationsInput!): ExportResult!
+  importTranslations(input: ImportTranslationsInput!): ImportResult!
   loginUser(loginUserInput: LoginUserInput!): AuthenticationPayload!
   logoutUser: LogoutOutput!
   registerNewTenant(registerNewTenantInput: RegisterNewTenantInput!): AuthenticationPayload!

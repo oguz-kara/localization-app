@@ -3,10 +3,10 @@ import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { CreateProjectInput } from '../../api/graphql/dto/create-project.input'
 import { ProjectEntity } from '../../api/graphql/entities/project.entity'
-import { 
-  EntityNotFoundException, 
+import {
+  EntityNotFoundException,
   UniqueConstraintViolationException,
-  AccessDeniedException
+  AccessDeniedException,
 } from 'src/common/exceptions'
 
 @Injectable()
@@ -48,7 +48,7 @@ export class ProjectService {
     return {
       id: project.id,
       name: project.name,
-      description: project.description,
+      description: project.description ?? undefined,
       slug: project.slug,
       isActive: project.isActive,
       channelToken: project.channelToken,
@@ -57,7 +57,10 @@ export class ProjectService {
     }
   }
 
-  async getProject(ctx: RequestContext, id: string): Promise<ProjectEntity | null> {
+  async getProject(
+    ctx: RequestContext,
+    id: string,
+  ): Promise<ProjectEntity | null> {
     if (!ctx.channelToken) {
       throw new AccessDeniedException('Channel token required')
     }
@@ -76,7 +79,7 @@ export class ProjectService {
     return {
       id: project.id,
       name: project.name,
-      description: project.description,
+      description: project.description ?? undefined,
       slug: project.slug,
       isActive: project.isActive,
       channelToken: project.channelToken,
@@ -100,10 +103,10 @@ export class ProjectService {
       },
     })
 
-    return projects.map(project => ({
+    return projects.map((project) => ({
       id: project.id,
       name: project.name,
-      description: project.description,
+      description: project.description ?? undefined,
       slug: project.slug,
       isActive: project.isActive,
       channelToken: project.channelToken,
@@ -112,7 +115,10 @@ export class ProjectService {
     }))
   }
 
-  async verifyProjectAccess(ctx: RequestContext, projectId: string): Promise<void> {
+  async verifyProjectAccess(
+    ctx: RequestContext,
+    projectId: string,
+  ): Promise<void> {
     if (!ctx.channelToken) {
       throw new AccessDeniedException('Channel token required')
     }

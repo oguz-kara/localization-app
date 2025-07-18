@@ -15,6 +15,12 @@ enum TranslationStatus {
   APPROVED
 }
 
+enum UserRole {
+  ADMIN
+  TRANSLATOR
+  REVIEWER
+}
+
 // Models
 
 model User {
@@ -25,10 +31,14 @@ model User {
   email    String  @unique
   name     String?
   password String
+  role     UserRole @default(TRANSLATOR)
 
   // Relations
   channelToken String
   channel      Channel @relation(fields: [channelToken], references: [token])
+  
+  // Audit Relations
+  translationHistory TranslationHistory[]
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -152,6 +162,8 @@ model TranslationKey {
   key         String // The translation key (e.g., "buttons.submit", "welcome.message")
   description String? // Developer notes about the key
   context     String? // Usage context or screenshots
+  notes       String? // Additional notes for translators
+  screenshots Json? // Screenshot attachments for context
   isActive    Boolean @default(true)
 
   // Relations - Required project relation
@@ -189,6 +201,9 @@ model Translation {
   languageId String
   language   Language @relation(fields: [languageId], references: [id], onDelete: Cascade)
 
+  // Audit Relations
+  history TranslationHistory[]
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -197,4 +212,30 @@ model Translation {
   @@index([translationKeyId])
   @@index([languageId])
   @@index([status])
+}
+
+model TranslationHistory {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  action    String // Action type (e.g., "UPDATE", "CREATE", "DELETE")
+  oldValue  String?
+  newValue  String?
+  oldStatus TranslationStatus?
+  newStatus TranslationStatus?
+
+  // Relations - Required relations
+  translationId String
+  translation   Translation @relation(fields: [translationId], references: [id], onDelete: Cascade)
+  
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+
+  @@index([translationId])
+  @@index([userId])
+  @@index([createdAt])
 }

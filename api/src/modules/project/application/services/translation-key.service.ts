@@ -46,8 +46,8 @@ export class TranslationKeyService {
     return {
       id: translationKey.id,
       key: translationKey.key,
-      description: translationKey.description,
-      context: translationKey.context,
+      description: translationKey.description ?? undefined,
+      context: translationKey.context ?? undefined,
       isActive: translationKey.isActive,
       projectId: translationKey.projectId,
       createdAt: translationKey.createdAt,
@@ -72,11 +72,11 @@ export class TranslationKeyService {
       },
     })
 
-    return translationKeys.map(key => ({
+    return translationKeys.map((key) => ({
       id: key.id,
       key: key.key,
-      description: key.description,
-      context: key.context,
+      description: key.description ?? undefined,
+      context: key.context ?? undefined,
       isActive: key.isActive,
       projectId: key.projectId,
       createdAt: key.createdAt,

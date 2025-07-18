@@ -1,0 +1,5 @@
+export * from './protect-resource.decorator'
+export * from './protect-resource-api-key.decorator'
+export * from './protect-resource-flexible.decorator'
+export * from './protect-resource-roles.decorator'
+export * from './roles.decorator'

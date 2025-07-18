@@ -1,4 +1,5 @@
 import { AsyncLocalStorage } from 'async_hooks'
+import { UserRole } from '@prisma/client'
 
 export interface CtxChannel {
   token?: string
@@ -8,6 +9,7 @@ export interface CtxUser {
   id: string
   name?: string
   email?: string
+  role?: UserRole
 }
 
 export interface CtxJWTPayload {
@@ -58,6 +60,10 @@ export class RequestContext {
 
   static setCurrentContext(context: RequestContext): void {
     RequestContext.asyncLocalStorage.enterWith(context)
+  }
+
+  static fromAsyncStorage(): RequestContext | undefined {
+    return RequestContext.asyncLocalStorage.getStore()
   }
 
   get channel(): CtxChannel {
