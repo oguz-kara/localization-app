@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+
+// Models
+
+model User {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  email    String  @unique
+  name     String?
+  password String
+
+  // Relations
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Channel {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  name        String  @unique
+  token       String  @unique
+  description String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations - Core
+  users   User[]
+  apiKeys ApiKey[]
+}
+
+model ApiKey {
+  // Primary Key
+  id String @id @default(cuid())
+
+  // Basic Fields
+  name        String
+  keyHash     String @unique
+  description String?
+  isActive    Boolean @default(true)
+
+  // Relations
+  channelToken String
+  channel      Channel @relation(fields: [channelToken], references: [token])
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([channelToken])
+}

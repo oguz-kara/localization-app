@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: localization_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+      working-directory: ./api
+
+    - name: Run linter
+      run: npm run lint
+      working-directory: ./api
+
+    - name: Generate Prisma client
+      run: npx prisma generate
+      working-directory: ./api
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/localization_test
+
+    - name: Run database migrations
+      run: npx prisma migrate deploy
+      working-directory: ./api
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/localization_test
+
+    - name: Build application
+      run: npm run build
+      working-directory: ./api
+
+    - name: Run tests
+      run: npm test
+      working-directory: ./api
+      env:
+        DATABASE_URL: postgresql://postgres:postgres@localhost:5432/localization_test

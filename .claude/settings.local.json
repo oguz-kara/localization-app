@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(rm:*)",
+      "Bash(npx prisma migrate dev:*)",
+      "Bash(DATABASE_URL=\"postgresql://postgres:4784961Edc!@localhost:5433/localization_dev?schema=public\" npx prisma migrate dev --name remove-company-attribute-models)",
+      "Bash(docker-compose up:*)",
+      "Bash(mkdir:*)",
+      "WebFetch(domain:docs.vendure.io)"
+    ],
+    "deny": []
+  }
+}
