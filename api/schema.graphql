@@ -47,6 +47,13 @@ input CreateProjectInput {
   slug: String!
 }
 
+input CreateTranslationInput {
+  language: String!
+  status: String
+  translationKeyId: String!
+  value: String!
+}
+
 input CreateTranslationKeyInput {
   context: String
   description: String
@@ -133,8 +140,11 @@ type Mutation {
   createApiKey(input: CreateApiKeyInput!): ApiKeyEntity!
   createChannel(createChannelInput: CreateChannelInput!): Channel!
   createProject(input: CreateProjectInput!): ProjectEntity!
+  createTranslation(input: CreateTranslationInput!): TranslationEntity!
   createTranslationKey(input: CreateTranslationKeyInput!): TranslationKeyEntity!
   deleteApiKey(id: String!): Boolean!
+  deleteTranslation(id: String!): TranslationEntity!
+  deleteTranslationKey(id: String!): TranslationKeyEntity!
   exportTranslations(input: ExportTranslationsInput!): ExportResult!
   importTranslations(input: ImportTranslationsInput!): ImportResult!
   loginUser(loginUserInput: LoginUserInput!): AuthenticationPayload!
@@ -146,6 +156,8 @@ type Mutation {
   retryFailedJobsByType(jobType: String!): RetryJobResult!
   revokeApiKey(id: String!): Boolean!
   syncTranslations(input: SyncTranslationsInput!): SyncTranslationsResult!
+  updateTranslation(input: UpdateTranslationInput!): TranslationEntity!
+  updateTranslationKey(input: UpdateTranslationKeyInput!): TranslationKeyEntity!
 }
 
 type ProjectEntity {
@@ -229,6 +241,18 @@ enum SyncTranslationsType {
   SINGLE_KEY
 }
 
+type TranslationEntity {
+  createdAt: DateTime!
+  id: String!
+  languageId: String!
+  machineTranslated: Boolean!
+  reviewNotes: String
+  status: TranslationStatus!
+  translationKeyId: String!
+  updatedAt: DateTime!
+  value: String!
+}
+
 type TranslationKeyEntity {
   context: String
   createdAt: DateTime!
@@ -237,7 +261,15 @@ type TranslationKeyEntity {
   isActive: Boolean!
   key: String!
   projectId: String!
+  translations: TranslationsResponse
   updatedAt: DateTime!
+}
+
+enum TranslationStatus {
+  APPROVED
+  IN_REVIEW
+  MACHINE_TRANSLATED
+  UNTRANSLATED
 }
 
 type TranslationsResponse {
@@ -246,6 +278,20 @@ type TranslationsResponse {
   totalKeys: Float!
   translatedKeys: Float!
   translations: JSON!
+}
+
+input UpdateTranslationInput {
+  id: String!
+  status: String
+  value: String
+}
+
+input UpdateTranslationKeyInput {
+  context: String
+  description: String
+  id: String!
+  isActive: Boolean
+  key: String
 }
 
 type User {

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useApolloClient } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -24,17 +25,23 @@ import {
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
-import { useCreateTranslationKeyMutation } from '@/graphql/generated/hooks'
+import { useCreateTranslationKeyMutation, GetProjectTranslationsDocument } from '@/graphql/generated/hooks'
 
 const createTranslationKeySchema = z.object({
-  key: z.string()
+  key: z
+    .string()
     .min(1, 'Translation key is required')
     .max(200, 'Translation key must be less than 200 characters')
-    .regex(/^[a-zA-Z0-9._-]+$/, 'Key must contain only letters, numbers, dots, underscores, and hyphens'),
-  description: z.string()
+    .regex(
+      /^[a-zA-Z0-9._-]+$/,
+      'Key must contain only letters, numbers, dots, underscores, and hyphens',
+    ),
+  description: z
+    .string()
     .max(500, 'Description must be less than 500 characters')
     .optional(),
-  context: z.string()
+  context: z
+    .string()
     .max(1000, 'Context must be less than 1000 characters')
     .optional(),
 })
@@ -45,27 +52,78 @@ interface CreateTranslationKeyModalProps {
   isOpen: boolean
   onClose: () => void
   projectId: string
-  onSuccess?: (translationKey: any) => void
 }
 
-export function CreateTranslationKeyModal({ 
-  isOpen, 
-  onClose, 
+export function CreateTranslationKeyModal({
+  isOpen,
+  onClose,
   projectId,
-  onSuccess 
 }: CreateTranslationKeyModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+  const client = useApolloClient()
+
   const [createTranslationKey] = useCreateTranslationKeyMutation({
     onCompleted: (data) => {
-      onSuccess?.(data.createTranslationKey)
+      console.log('Translation key created:', data.createTranslationKey)
+      
+      // Update Apollo cache to include the new translation key
+      const newTranslationKey = data.createTranslationKey
+      
+      try {
+        // Read existing cache data
+        const existingData = client.readQuery({
+          query: GetProjectTranslationsDocument,
+          variables: { projectId }
+        })
+
+        if (existingData?.translationKeys) {
+          // Transform the new key to match the expected format
+          const transformedKey = {
+            id: newTranslationKey.id,
+            key: newTranslationKey.key,
+            description: newTranslationKey.description,
+            context: newTranslationKey.context,
+            isActive: newTranslationKey.isActive,
+            projectId: newTranslationKey.projectId,
+            createdAt: newTranslationKey.createdAt,
+            updatedAt: newTranslationKey.updatedAt,
+            translations: {}
+          }
+
+          // Write updated data back to cache
+          client.writeQuery({
+            query: GetProjectTranslationsDocument,
+            variables: { projectId },
+            data: {
+              translationKeys: [...existingData.translationKeys, transformedKey]
+            }
+          })
+        }
+      } catch (error) {
+        console.error('Error updating cache:', error)
+      }
+
       form.reset()
       onClose()
     },
     onError: (error) => {
       console.error('Failed to create translation key:', error)
-      // Handle error - could show toast notification
-    }
+      setIsSubmitting(false)
+      
+      // Show more specific error messages
+      let errorMessage = 'Failed to create translation key.'
+      
+      if (error.message.includes('Access denied') || error.message.includes('Unauthorized')) {
+        errorMessage = 'You need to be logged in to create translation keys. Please log in and try again.'
+      } else if (error.message.includes('Network error')) {
+        errorMessage = 'Network error. Please check your connection and try again.'
+      } else if (error.graphQLErrors && error.graphQLErrors.length > 0) {
+        errorMessage = error.graphQLErrors[0].message
+      }
+      
+      // You could show this error in a toast notification
+      alert(errorMessage)
+    },
   })
 
   const form = useForm<CreateTranslationKeyForm>({
@@ -80,16 +138,18 @@ export function CreateTranslationKeyModal({
   const onSubmit = async (data: CreateTranslationKeyForm) => {
     setIsSubmitting(true)
     try {
-      await createTranslationKey({
+      console.log('Creating translation key:', data)
+      const result = await createTranslationKey({
         variables: {
           input: {
             key: data.key,
             projectId,
             description: data.description || undefined,
             context: data.context || undefined,
-          }
-        }
+          },
+        },
       })
+      console.log('Translation key created:', result)
     } catch (error) {
       console.error('Error creating translation key:', error)
     } finally {
@@ -121,13 +181,11 @@ export function CreateTranslationKeyModal({
                 <FormItem>
                   <FormLabel>Translation Key *</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="buttons.submit"
-                      {...field}
-                    />
+                    <Input placeholder="buttons.submit" {...field} />
                   </FormControl>
                   <FormDescription>
-                    Unique identifier for this translation (e.g., buttons.submit, welcome.message)
+                    Unique identifier for this translation (e.g.,
+                    buttons.submit, welcome.message)
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -141,10 +199,7 @@ export function CreateTranslationKeyModal({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Submit button text"
-                      {...field}
-                    />
+                    <Input placeholder="Submit button text" {...field} />
                   </FormControl>
                   <FormDescription>
                     Brief description of what this text is for
@@ -180,10 +235,7 @@ export function CreateTranslationKeyModal({
               <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={isSubmitting}
-              >
+              <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Creating...' : 'Create Key'}
               </Button>
             </DialogFooter>

@@ -2,9 +2,13 @@ import { Injectable } from '@nestjs/common'
 import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { CreateTranslationKeyInput } from '../../api/graphql/dto/create-translation-key.input'
+import { UpdateTranslationKeyInput } from '../../api/graphql/dto/update-translation-key.input'
 import { TranslationKeyEntity } from '../../api/graphql/entities/translation-key.entity'
 import { ProjectService } from './project.service'
-import { UniqueConstraintViolationException } from 'src/common/exceptions'
+import {
+  UniqueConstraintViolationException,
+  EntityNotFoundException,
+} from 'src/common/exceptions'
 
 @Injectable()
 export class TranslationKeyService {
@@ -82,5 +86,97 @@ export class TranslationKeyService {
       createdAt: key.createdAt,
       updatedAt: key.updatedAt,
     }))
+  }
+
+  async updateTranslationKey(
+    ctx: RequestContext,
+    input: UpdateTranslationKeyInput,
+  ): Promise<TranslationKeyEntity> {
+    // Find the translation key and verify access
+    const existingKey = await this.prisma.translationKey.findUnique({
+      where: { id: input.id },
+      include: { project: true },
+    })
+
+    if (!existingKey) {
+      throw new EntityNotFoundException('TranslationKey', input.id)
+    }
+
+    // Verify project access
+    await this.projectService.verifyProjectAccess(ctx, existingKey.projectId)
+
+    // Check if new key name conflicts (if key is being updated)
+    if (input.key && input.key !== existingKey.key) {
+      const conflictingKey = await this.prisma.translationKey.findUnique({
+        where: {
+          key_projectId: {
+            key: input.key,
+            projectId: existingKey.projectId,
+          },
+        },
+      })
+
+      if (conflictingKey) {
+        throw new UniqueConstraintViolationException('key')
+      }
+    }
+
+    const updatedKey = await this.prisma.translationKey.update({
+      where: { id: input.id },
+      data: {
+        ...(input.key && { key: input.key }),
+        ...(input.description !== undefined && {
+          description: input.description,
+        }),
+        ...(input.context !== undefined && { context: input.context }),
+        ...(input.isActive !== undefined && { isActive: input.isActive }),
+      },
+    })
+
+    return {
+      id: updatedKey.id,
+      key: updatedKey.key,
+      description: updatedKey.description ?? undefined,
+      context: updatedKey.context ?? undefined,
+      isActive: updatedKey.isActive,
+      projectId: updatedKey.projectId,
+      createdAt: updatedKey.createdAt,
+      updatedAt: updatedKey.updatedAt,
+    }
+  }
+
+  async deleteTranslationKey(
+    ctx: RequestContext,
+    id: string,
+  ): Promise<TranslationKeyEntity> {
+    // Find the translation key and verify access
+    const existingKey = await this.prisma.translationKey.findUnique({
+      where: { id },
+      include: { project: true },
+    })
+
+    if (!existingKey) {
+      throw new EntityNotFoundException('TranslationKey', id)
+    }
+
+    // Verify project access
+    await this.projectService.verifyProjectAccess(ctx, existingKey.projectId)
+
+    // Soft delete by setting isActive to false
+    const deletedKey = await this.prisma.translationKey.update({
+      where: { id },
+      data: { isActive: false },
+    })
+
+    return {
+      id: deletedKey.id,
+      key: deletedKey.key,
+      description: deletedKey.description ?? undefined,
+      context: deletedKey.context ?? undefined,
+      isActive: deletedKey.isActive,
+      projectId: deletedKey.projectId,
+      createdAt: deletedKey.createdAt,
+      updatedAt: deletedKey.updatedAt,
+    }
   }
 }

@@ -130,6 +130,12 @@ Multi-tenant translation management system:
 
 ## Key Development Practices
 
+### Git Commit Standards
+- **NEVER** include AI assistant advertisements or credits in commit messages
+- **NEVER** include "Generated with [Tool Name]" or "Co-Authored-By: [AI]" in commits
+- Keep commit messages professional and focused on the actual changes
+- Use conventional commit format: `type(scope): description`
+
 ### Code Generation
 - Run `pnpm run generate` in web-admin after GraphQL schema changes
 - Backend uses code-first GraphQL with TypeScript decorators
@@ -357,5 +363,30 @@ If the answer to any of these is "no," the proposed change must be rejected.
 - This ensures consistent authentication handling and proper server-side rendering
 
 ### Client Components  
-- Use Apollo Client hooks from generated hooks file: `@/graphql/generated/hooks.ts`
+- **ALWAYS** use Apollo Client hooks from `@/graphql/generated/hooks.ts`
+- **NEVER** write custom GraphQL queries in client components
+- Import hooks like: `import { useGetProjectsQuery, useCreateProjectMutation } from '@/graphql/generated/hooks'`
 - Use the Apollo Provider for client-side data fetching and mutations
+- All GraphQL operations must be defined in `.graphql` files first, then generated via `pnpm run generate`
+
+### GraphQL Operations Pattern
+1. Define operations in `.graphql` files in `src/graphql/queries/` or `src/graphql/mutations/`
+2. Run `pnpm run generate` to create TypeScript hooks
+3. Import and use the generated hooks in client components
+4. Never write inline GraphQL queries or use `gql` directly in components
+
+### Example Usage
+```typescript
+// ✅ CORRECT - Use generated hooks
+import { useGetProjectsQuery, useCreateProjectMutation } from '@/graphql/generated/hooks'
+
+function ProjectsList() {
+  const { data, loading } = useGetProjectsQuery()
+  const [createProject] = useCreateProjectMutation()
+  // ...
+}
+
+// ❌ WRONG - Don't write inline queries
+import { gql, useQuery } from '@apollo/client'
+const GET_PROJECTS = gql`query { projects { id name } }`
+```

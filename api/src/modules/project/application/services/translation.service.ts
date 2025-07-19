@@ -3,6 +3,9 @@ import { PrismaService } from 'src/common/services/prisma/prisma.service'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { ProjectService } from './project.service'
 import { TranslationsResponse } from '../../api/graphql/entities/translations-response.entity'
+import { TranslationEntity } from '../../api/graphql/entities/translation.entity'
+import { CreateTranslationInput } from '../../api/graphql/dto/create-translation.input'
+import { UpdateTranslationInput } from '../../api/graphql/dto/update-translation.input'
 import { EntityNotFoundException } from 'src/common/exceptions'
 import { ImportTranslationsInput, ExportTranslationsInput, ImportResult, ExportResult } from '../../api/graphql/entities/import-export.entity'
 import { TranslationStatus } from '@prisma/client'
@@ -217,5 +220,142 @@ export class TranslationService {
 
     // In a real implementation, save to file system or cloud storage
     console.log('Export data generated:', exportData.length, 'characters')
+  }
+
+  async createTranslation(
+    ctx: RequestContext,
+    input: CreateTranslationInput,
+  ): Promise<TranslationEntity> {
+    // Verify the translation key exists and we have access
+    const translationKey = await this.prisma.translationKey.findUnique({
+      where: { id: input.translationKeyId },
+      include: { project: true },
+    })
+
+    if (!translationKey) {
+      throw new EntityNotFoundException('TranslationKey', input.translationKeyId)
+    }
+
+    // Verify project access
+    await this.projectService.verifyProjectAccess(ctx, translationKey.projectId)
+
+    // Verify language exists
+    const language = await this.prisma.language.findUnique({
+      where: { code: input.language },
+    })
+
+    if (!language) {
+      throw new EntityNotFoundException('Language', input.language)
+    }
+
+    // Create the translation
+    const translation = await this.prisma.translation.create({
+      data: {
+        value: input.value,
+        status: input.status || TranslationStatus.IN_REVIEW,
+        translationKeyId: input.translationKeyId,
+        languageId: language.id,
+      },
+    })
+
+    return {
+      id: translation.id,
+      value: translation.value,
+      status: translation.status,
+      machineTranslated: translation.machineTranslated,
+      reviewNotes: translation.reviewNotes ?? undefined,
+      translationKeyId: translation.translationKeyId,
+      languageId: translation.languageId,
+      createdAt: translation.createdAt,
+      updatedAt: translation.updatedAt,
+    }
+  }
+
+  async updateTranslation(
+    ctx: RequestContext,
+    input: UpdateTranslationInput,
+  ): Promise<TranslationEntity> {
+    // Find the translation and verify access
+    const existingTranslation = await this.prisma.translation.findUnique({
+      where: { id: input.id },
+      include: { 
+        translationKey: { 
+          include: { project: true } 
+        } 
+      },
+    })
+
+    if (!existingTranslation) {
+      throw new EntityNotFoundException('Translation', input.id)
+    }
+
+    // Verify project access
+    await this.projectService.verifyProjectAccess(
+      ctx, 
+      existingTranslation.translationKey.projectId
+    )
+
+    // Update the translation
+    const updatedTranslation = await this.prisma.translation.update({
+      where: { id: input.id },
+      data: {
+        ...(input.value !== undefined && { value: input.value }),
+        ...(input.status !== undefined && { status: input.status }),
+      },
+    })
+
+    return {
+      id: updatedTranslation.id,
+      value: updatedTranslation.value,
+      status: updatedTranslation.status,
+      machineTranslated: updatedTranslation.machineTranslated,
+      reviewNotes: updatedTranslation.reviewNotes ?? undefined,
+      translationKeyId: updatedTranslation.translationKeyId,
+      languageId: updatedTranslation.languageId,
+      createdAt: updatedTranslation.createdAt,
+      updatedAt: updatedTranslation.updatedAt,
+    }
+  }
+
+  async deleteTranslation(
+    ctx: RequestContext,
+    id: string,
+  ): Promise<TranslationEntity> {
+    // Find the translation and verify access
+    const existingTranslation = await this.prisma.translation.findUnique({
+      where: { id },
+      include: { 
+        translationKey: { 
+          include: { project: true } 
+        } 
+      },
+    })
+
+    if (!existingTranslation) {
+      throw new EntityNotFoundException('Translation', id)
+    }
+
+    // Verify project access
+    await this.projectService.verifyProjectAccess(
+      ctx, 
+      existingTranslation.translationKey.projectId
+    )
+
+    // Delete the translation
+    const deletedTranslation = await this.prisma.translation.delete({
+      where: { id },
+    })
+
+    return {
+      id: deletedTranslation.id,
+      value: deletedTranslation.value,
+      status: deletedTranslation.status,
+      machineTranslated: deletedTranslation.machineTranslated,
+      reviewNotes: deletedTranslation.reviewNotes ?? undefined,
+      translationKeyId: deletedTranslation.translationKeyId,
+      languageId: deletedTranslation.languageId,
+      createdAt: deletedTranslation.createdAt,
+      updatedAt: deletedTranslation.updatedAt,
+    }
   }
 }

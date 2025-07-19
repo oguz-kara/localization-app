@@ -3,7 +3,7 @@ import { CodegenConfig } from "@graphql-codegen/cli";
 const config: CodegenConfig = {
   overwrite: true,
   schema: "http://localhost:3000/admin-api",
-  documents: "./src/**/*.{ts,tsx,graphql,gql}",
+  documents: "./src/graphql/documents/**/*.{ts,tsx,graphql,gql}",
   config: {
     dedupeFragments: true,
   },

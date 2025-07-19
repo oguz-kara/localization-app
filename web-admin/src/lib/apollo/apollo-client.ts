@@ -8,9 +8,7 @@ import {
 import cookies from 'js-cookie'
 
 const httpLink = new HttpLink({
-  uri:
-    process.env.NEXT_PUBLIC_APP_GRAPHQL_API_URL ||
-    'http://localhost:3001/api/graphql',
+  uri: 'http://localhost:3001/api/graphql',
 })
 
 const channelMiddleware = new ApolloLink((operation, forward) => {

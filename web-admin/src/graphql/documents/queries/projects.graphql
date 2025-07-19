@@ -32,6 +32,12 @@ query GetProjectTranslations($projectId: String!) {
     context
     isActive
     projectId
+    translations {
+      language
+      totalKeys
+      translatedKeys
+      translations
+    }
     createdAt
     updatedAt
   }

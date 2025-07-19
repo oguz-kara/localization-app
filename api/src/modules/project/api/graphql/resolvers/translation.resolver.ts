@@ -1,10 +1,14 @@
 import { Resolver, Query, Args, Mutation } from '@nestjs/graphql'
 import { RequestContext } from 'src/common/request-context/request-context'
 import { Ctx } from 'src/common/request-context/request-context.decorator'
+import { ProtectResource } from 'src/common/decorators/protect-resource.decorator'
 import { ProtectResourceFlexible } from 'src/common/decorators/protect-resource-flexible.decorator'
 import { ProtectResourceRoles } from 'src/common/decorators/protect-resource-roles.decorator'
 import { TranslationService } from 'src/modules/project/application/services/translation.service'
 import { TranslationsResponse } from '../entities/translations-response.entity'
+import { TranslationEntity } from '../entities/translation.entity'
+import { CreateTranslationInput } from '../dto/create-translation.input'
+import { UpdateTranslationInput } from '../dto/update-translation.input'
 import {
   ImportTranslationsInput,
   ExportTranslationsInput,
@@ -43,5 +47,32 @@ export class TranslationResolver {
     @Args('input') input: ExportTranslationsInput,
   ): Promise<ExportResult> {
     return this.translationService.exportTranslations(ctx, input)
+  }
+
+  @Mutation(() => TranslationEntity, { name: 'createTranslation' })
+  @ProtectResource()
+  async createTranslation(
+    @Ctx() ctx: RequestContext,
+    @Args('input') input: CreateTranslationInput,
+  ): Promise<TranslationEntity> {
+    return await this.translationService.createTranslation(ctx, input)
+  }
+
+  @Mutation(() => TranslationEntity, { name: 'updateTranslation' })
+  @ProtectResource()
+  async updateTranslation(
+    @Ctx() ctx: RequestContext,
+    @Args('input') input: UpdateTranslationInput,
+  ): Promise<TranslationEntity> {
+    return await this.translationService.updateTranslation(ctx, input)
+  }
+
+  @Mutation(() => TranslationEntity, { name: 'deleteTranslation' })
+  @ProtectResource()
+  async deleteTranslation(
+    @Ctx() ctx: RequestContext,
+    @Args('id') id: string,
+  ): Promise<TranslationEntity> {
+    return await this.translationService.deleteTranslation(ctx, id)
   }
 }

@@ -8,8 +8,18 @@ export async function POST(req: NextRequest) {
 
   const accessToken = token?.accessToken as string | undefined
 
+  console.log('accessToken', accessToken)
+
+  console.log('token', token)
+
   const filteredHeaders = new Headers()
   filteredHeaders.set('Content-Type', 'application/json')
+
+  console.log('body', body)
+
+  // Add headers to bypass CSRF protection
+  filteredHeaders.set('x-apollo-operation-name', 'GraphQLRequest')
+  filteredHeaders.set('apollo-require-preflight', 'true')
 
   if (accessToken) {
     filteredHeaders.set('Authorization', `Bearer ${accessToken}`)
@@ -27,10 +37,14 @@ export async function POST(req: NextRequest) {
       cache: 'no-store',
     })
 
+    console.log('response', response)
+
     const nextResponse = new NextResponse(response.body, {
       status: response.status,
       headers: response.headers,
     })
+
+    console.log('nextResponse', nextResponse)
 
     return nextResponse
   } catch (error) {

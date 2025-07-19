@@ -68,6 +68,13 @@ export type CreateProjectInput = {
   slug: Scalars['String']['input'];
 };
 
+export type CreateTranslationInput = {
+  language: Scalars['String']['input'];
+  status?: InputMaybe<Scalars['String']['input']>;
+  translationKeyId: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
 export type CreateTranslationKeyInput = {
   context?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -150,8 +157,11 @@ export type Mutation = {
   createApiKey: ApiKeyEntity;
   createChannel: Channel;
   createProject: ProjectEntity;
+  createTranslation: TranslationEntity;
   createTranslationKey: TranslationKeyEntity;
   deleteApiKey: Scalars['Boolean']['output'];
+  deleteTranslation: TranslationEntity;
+  deleteTranslationKey: TranslationKeyEntity;
   exportTranslations: ExportResult;
   importTranslations: ImportResult;
   loginUser: AuthenticationPayload;
@@ -163,6 +173,8 @@ export type Mutation = {
   retryFailedJobsByType: RetryJobResult;
   revokeApiKey: Scalars['Boolean']['output'];
   syncTranslations: SyncTranslationsResult;
+  updateTranslation: TranslationEntity;
+  updateTranslationKey: TranslationKeyEntity;
 };
 
 
@@ -186,12 +198,27 @@ export type MutationCreateProjectArgs = {
 };
 
 
+export type MutationCreateTranslationArgs = {
+  input: CreateTranslationInput;
+};
+
+
 export type MutationCreateTranslationKeyArgs = {
   input: CreateTranslationKeyInput;
 };
 
 
 export type MutationDeleteApiKeyArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteTranslationArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteTranslationKeyArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -244,6 +271,16 @@ export type MutationRevokeApiKeyArgs = {
 
 export type MutationSyncTranslationsArgs = {
   input: SyncTranslationsInput;
+};
+
+
+export type MutationUpdateTranslationArgs = {
+  input: UpdateTranslationInput;
+};
+
+
+export type MutationUpdateTranslationKeyArgs = {
+  input: UpdateTranslationKeyInput;
 };
 
 export type ProjectEntity = {
@@ -371,6 +408,19 @@ export enum SyncTranslationsType {
   SingleKey = 'SINGLE_KEY'
 }
 
+export type TranslationEntity = {
+  __typename?: 'TranslationEntity';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  languageId: Scalars['String']['output'];
+  machineTranslated: Scalars['Boolean']['output'];
+  reviewNotes?: Maybe<Scalars['String']['output']>;
+  status: TranslationStatus;
+  translationKeyId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  value: Scalars['String']['output'];
+};
+
 export type TranslationKeyEntity = {
   __typename?: 'TranslationKeyEntity';
   context?: Maybe<Scalars['String']['output']>;
@@ -380,8 +430,16 @@ export type TranslationKeyEntity = {
   isActive: Scalars['Boolean']['output'];
   key: Scalars['String']['output'];
   projectId: Scalars['String']['output'];
+  translations: TranslationsResponse;
   updatedAt: Scalars['DateTime']['output'];
 };
+
+export enum TranslationStatus {
+  Approved = 'APPROVED',
+  InReview = 'IN_REVIEW',
+  MachineTranslated = 'MACHINE_TRANSLATED',
+  Untranslated = 'UNTRANSLATED'
+}
 
 export type TranslationsResponse = {
   __typename?: 'TranslationsResponse';
@@ -390,6 +448,20 @@ export type TranslationsResponse = {
   totalKeys: Scalars['Float']['output'];
   translatedKeys: Scalars['Float']['output'];
   translations: Scalars['JSON']['output'];
+};
+
+export type UpdateTranslationInput = {
+  id: Scalars['String']['input'];
+  status?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateTranslationKeyInput = {
+  context?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
@@ -406,6 +478,13 @@ export type UserConnection = {
   items: Array<User>;
   totalCount: Scalars['Int']['output'];
 };
+
+export type CreateProjectMutationVariables = Exact<{
+  input: CreateProjectInput;
+}>;
+
+
+export type CreateProjectMutation = { __typename?: 'Mutation', createProject: { __typename?: 'ProjectEntity', id: string, name: string, description?: string | null, slug: string, isActive: boolean, channelToken: string, createdAt: any, updatedAt: any } };
 
 export type CreateTranslationKeyMutationVariables = Exact<{
   input: CreateTranslationKeyInput;
@@ -435,6 +514,41 @@ export type ImportTranslationsMutationVariables = Exact<{
 
 export type ImportTranslationsMutation = { __typename?: 'Mutation', importTranslations: { __typename?: 'ImportResult', jobId: string, message: string, status: string, totalKeys: number } };
 
+export type CreateTranslationMutationVariables = Exact<{
+  input: CreateTranslationInput;
+}>;
+
+
+export type CreateTranslationMutation = { __typename?: 'Mutation', createTranslation: { __typename?: 'TranslationEntity', id: string, value: string, status: TranslationStatus, machineTranslated: boolean, reviewNotes?: string | null, translationKeyId: string, languageId: string, createdAt: any, updatedAt: any } };
+
+export type UpdateTranslationMutationVariables = Exact<{
+  input: UpdateTranslationInput;
+}>;
+
+
+export type UpdateTranslationMutation = { __typename?: 'Mutation', updateTranslation: { __typename?: 'TranslationEntity', id: string, value: string, status: TranslationStatus, machineTranslated: boolean, reviewNotes?: string | null, translationKeyId: string, languageId: string, createdAt: any, updatedAt: any } };
+
+export type DeleteTranslationMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type DeleteTranslationMutation = { __typename?: 'Mutation', deleteTranslation: { __typename?: 'TranslationEntity', id: string, value: string, status: TranslationStatus, machineTranslated: boolean, reviewNotes?: string | null, translationKeyId: string, languageId: string, createdAt: any, updatedAt: any } };
+
+export type UpdateTranslationKeyMutationVariables = Exact<{
+  input: UpdateTranslationKeyInput;
+}>;
+
+
+export type UpdateTranslationKeyMutation = { __typename?: 'Mutation', updateTranslationKey: { __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any } };
+
+export type DeleteTranslationKeyMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type DeleteTranslationKeyMutation = { __typename?: 'Mutation', deleteTranslationKey: { __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any } };
+
 export type GetProjectsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -452,7 +566,7 @@ export type GetProjectTranslationsQueryVariables = Exact<{
 }>;
 
 
-export type GetProjectTranslationsQuery = { __typename?: 'Query', translationKeys: Array<{ __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any }> };
+export type GetProjectTranslationsQuery = { __typename?: 'Query', translationKeys: Array<{ __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any, translations: { __typename?: 'TranslationsResponse', language: string, totalKeys: number, translatedKeys: number, translations: any } }> };
 
 export type GetTranslationsQueryVariables = Exact<{
   projectId: Scalars['String']['input'];
@@ -461,13 +575,6 @@ export type GetTranslationsQueryVariables = Exact<{
 
 
 export type GetTranslationsQuery = { __typename?: 'Query', getTranslations: { __typename?: 'TranslationsResponse', language: string, projectId: string, totalKeys: number, translatedKeys: number, translations: any } };
-
-export type CreateProjectMutationVariables = Exact<{
-  input: CreateProjectInput;
-}>;
-
-
-export type CreateProjectMutation = { __typename?: 'Mutation', createProject: { __typename?: 'ProjectEntity', id: string, name: string, description?: string | null, slug: string, isActive: boolean, channelToken: string, createdAt: any, updatedAt: any } };
 
 export type GetUserQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -482,6 +589,46 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, name?: string | null, email: string, createdAt?: any | null, updatedAt?: any | null } | null };
 
 
+export const CreateProjectDocument = gql`
+    mutation CreateProject($input: CreateProjectInput!) {
+  createProject(input: $input) {
+    id
+    name
+    description
+    slug
+    isActive
+    channelToken
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateProjectMutationFn = Apollo.MutationFunction<CreateProjectMutation, CreateProjectMutationVariables>;
+
+/**
+ * __useCreateProjectMutation__
+ *
+ * To run a mutation, you first call `useCreateProjectMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateProjectMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createProjectMutation, { data, loading, error }] = useCreateProjectMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateProjectMutation(baseOptions?: Apollo.MutationHookOptions<CreateProjectMutation, CreateProjectMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateProjectMutation, CreateProjectMutationVariables>(CreateProjectDocument, options);
+      }
+export type CreateProjectMutationHookResult = ReturnType<typeof useCreateProjectMutation>;
+export type CreateProjectMutationResult = Apollo.MutationResult<CreateProjectMutation>;
+export type CreateProjectMutationOptions = Apollo.BaseMutationOptions<CreateProjectMutation, CreateProjectMutationVariables>;
 export const CreateTranslationKeyDocument = gql`
     mutation CreateTranslationKey($input: CreateTranslationKeyInput!) {
   createTranslationKey(input: $input) {
@@ -632,6 +779,209 @@ export function useImportTranslationsMutation(baseOptions?: Apollo.MutationHookO
 export type ImportTranslationsMutationHookResult = ReturnType<typeof useImportTranslationsMutation>;
 export type ImportTranslationsMutationResult = Apollo.MutationResult<ImportTranslationsMutation>;
 export type ImportTranslationsMutationOptions = Apollo.BaseMutationOptions<ImportTranslationsMutation, ImportTranslationsMutationVariables>;
+export const CreateTranslationDocument = gql`
+    mutation CreateTranslation($input: CreateTranslationInput!) {
+  createTranslation(input: $input) {
+    id
+    value
+    status
+    machineTranslated
+    reviewNotes
+    translationKeyId
+    languageId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type CreateTranslationMutationFn = Apollo.MutationFunction<CreateTranslationMutation, CreateTranslationMutationVariables>;
+
+/**
+ * __useCreateTranslationMutation__
+ *
+ * To run a mutation, you first call `useCreateTranslationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateTranslationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createTranslationMutation, { data, loading, error }] = useCreateTranslationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useCreateTranslationMutation(baseOptions?: Apollo.MutationHookOptions<CreateTranslationMutation, CreateTranslationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateTranslationMutation, CreateTranslationMutationVariables>(CreateTranslationDocument, options);
+      }
+export type CreateTranslationMutationHookResult = ReturnType<typeof useCreateTranslationMutation>;
+export type CreateTranslationMutationResult = Apollo.MutationResult<CreateTranslationMutation>;
+export type CreateTranslationMutationOptions = Apollo.BaseMutationOptions<CreateTranslationMutation, CreateTranslationMutationVariables>;
+export const UpdateTranslationDocument = gql`
+    mutation UpdateTranslation($input: UpdateTranslationInput!) {
+  updateTranslation(input: $input) {
+    id
+    value
+    status
+    machineTranslated
+    reviewNotes
+    translationKeyId
+    languageId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdateTranslationMutationFn = Apollo.MutationFunction<UpdateTranslationMutation, UpdateTranslationMutationVariables>;
+
+/**
+ * __useUpdateTranslationMutation__
+ *
+ * To run a mutation, you first call `useUpdateTranslationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTranslationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTranslationMutation, { data, loading, error }] = useUpdateTranslationMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateTranslationMutation(baseOptions?: Apollo.MutationHookOptions<UpdateTranslationMutation, UpdateTranslationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateTranslationMutation, UpdateTranslationMutationVariables>(UpdateTranslationDocument, options);
+      }
+export type UpdateTranslationMutationHookResult = ReturnType<typeof useUpdateTranslationMutation>;
+export type UpdateTranslationMutationResult = Apollo.MutationResult<UpdateTranslationMutation>;
+export type UpdateTranslationMutationOptions = Apollo.BaseMutationOptions<UpdateTranslationMutation, UpdateTranslationMutationVariables>;
+export const DeleteTranslationDocument = gql`
+    mutation DeleteTranslation($id: String!) {
+  deleteTranslation(id: $id) {
+    id
+    value
+    status
+    machineTranslated
+    reviewNotes
+    translationKeyId
+    languageId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type DeleteTranslationMutationFn = Apollo.MutationFunction<DeleteTranslationMutation, DeleteTranslationMutationVariables>;
+
+/**
+ * __useDeleteTranslationMutation__
+ *
+ * To run a mutation, you first call `useDeleteTranslationMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteTranslationMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteTranslationMutation, { data, loading, error }] = useDeleteTranslationMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteTranslationMutation(baseOptions?: Apollo.MutationHookOptions<DeleteTranslationMutation, DeleteTranslationMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteTranslationMutation, DeleteTranslationMutationVariables>(DeleteTranslationDocument, options);
+      }
+export type DeleteTranslationMutationHookResult = ReturnType<typeof useDeleteTranslationMutation>;
+export type DeleteTranslationMutationResult = Apollo.MutationResult<DeleteTranslationMutation>;
+export type DeleteTranslationMutationOptions = Apollo.BaseMutationOptions<DeleteTranslationMutation, DeleteTranslationMutationVariables>;
+export const UpdateTranslationKeyDocument = gql`
+    mutation UpdateTranslationKey($input: UpdateTranslationKeyInput!) {
+  updateTranslationKey(input: $input) {
+    id
+    key
+    description
+    context
+    isActive
+    projectId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type UpdateTranslationKeyMutationFn = Apollo.MutationFunction<UpdateTranslationKeyMutation, UpdateTranslationKeyMutationVariables>;
+
+/**
+ * __useUpdateTranslationKeyMutation__
+ *
+ * To run a mutation, you first call `useUpdateTranslationKeyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTranslationKeyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTranslationKeyMutation, { data, loading, error }] = useUpdateTranslationKeyMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateTranslationKeyMutation(baseOptions?: Apollo.MutationHookOptions<UpdateTranslationKeyMutation, UpdateTranslationKeyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateTranslationKeyMutation, UpdateTranslationKeyMutationVariables>(UpdateTranslationKeyDocument, options);
+      }
+export type UpdateTranslationKeyMutationHookResult = ReturnType<typeof useUpdateTranslationKeyMutation>;
+export type UpdateTranslationKeyMutationResult = Apollo.MutationResult<UpdateTranslationKeyMutation>;
+export type UpdateTranslationKeyMutationOptions = Apollo.BaseMutationOptions<UpdateTranslationKeyMutation, UpdateTranslationKeyMutationVariables>;
+export const DeleteTranslationKeyDocument = gql`
+    mutation DeleteTranslationKey($id: String!) {
+  deleteTranslationKey(id: $id) {
+    id
+    key
+    description
+    context
+    isActive
+    projectId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export type DeleteTranslationKeyMutationFn = Apollo.MutationFunction<DeleteTranslationKeyMutation, DeleteTranslationKeyMutationVariables>;
+
+/**
+ * __useDeleteTranslationKeyMutation__
+ *
+ * To run a mutation, you first call `useDeleteTranslationKeyMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteTranslationKeyMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteTranslationKeyMutation, { data, loading, error }] = useDeleteTranslationKeyMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteTranslationKeyMutation(baseOptions?: Apollo.MutationHookOptions<DeleteTranslationKeyMutation, DeleteTranslationKeyMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteTranslationKeyMutation, DeleteTranslationKeyMutationVariables>(DeleteTranslationKeyDocument, options);
+      }
+export type DeleteTranslationKeyMutationHookResult = ReturnType<typeof useDeleteTranslationKeyMutation>;
+export type DeleteTranslationKeyMutationResult = Apollo.MutationResult<DeleteTranslationKeyMutation>;
+export type DeleteTranslationKeyMutationOptions = Apollo.BaseMutationOptions<DeleteTranslationKeyMutation, DeleteTranslationKeyMutationVariables>;
 export const GetProjectsDocument = gql`
     query GetProjects {
   projects {
@@ -734,6 +1084,12 @@ export const GetProjectTranslationsDocument = gql`
     context
     isActive
     projectId
+    translations {
+      language
+      totalKeys
+      translatedKeys
+      translations
+    }
     createdAt
     updatedAt
   }
@@ -817,46 +1173,6 @@ export type GetTranslationsQueryHookResult = ReturnType<typeof useGetTranslation
 export type GetTranslationsLazyQueryHookResult = ReturnType<typeof useGetTranslationsLazyQuery>;
 export type GetTranslationsSuspenseQueryHookResult = ReturnType<typeof useGetTranslationsSuspenseQuery>;
 export type GetTranslationsQueryResult = Apollo.QueryResult<GetTranslationsQuery, GetTranslationsQueryVariables>;
-export const CreateProjectDocument = gql`
-    mutation CreateProject($input: CreateProjectInput!) {
-  createProject(input: $input) {
-    id
-    name
-    description
-    slug
-    isActive
-    channelToken
-    createdAt
-    updatedAt
-  }
-}
-    `;
-export type CreateProjectMutationFn = Apollo.MutationFunction<CreateProjectMutation, CreateProjectMutationVariables>;
-
-/**
- * __useCreateProjectMutation__
- *
- * To run a mutation, you first call `useCreateProjectMutation` within a React component and pass it any options that fit your needs.
- * When your component renders, `useCreateProjectMutation` returns a tuple that includes:
- * - A mutate function that you can call at any time to execute the mutation
- * - An object with fields that represent the current status of the mutation's execution
- *
- * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
- *
- * @example
- * const [createProjectMutation, { data, loading, error }] = useCreateProjectMutation({
- *   variables: {
- *      input: // value for 'input'
- *   },
- * });
- */
-export function useCreateProjectMutation(baseOptions?: Apollo.MutationHookOptions<CreateProjectMutation, CreateProjectMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateProjectMutation, CreateProjectMutationVariables>(CreateProjectDocument, options);
-      }
-export type CreateProjectMutationHookResult = ReturnType<typeof useCreateProjectMutation>;
-export type CreateProjectMutationResult = Apollo.MutationResult<CreateProjectMutation>;
-export type CreateProjectMutationOptions = Apollo.BaseMutationOptions<CreateProjectMutation, CreateProjectMutationVariables>;
 export const GetUserDocument = gql`
     query GetUser($id: String!) {
   getUser(id: $id) {

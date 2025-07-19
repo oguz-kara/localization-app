@@ -67,6 +67,13 @@ export type CreateProjectInput = {
   slug: Scalars['String']['input'];
 };
 
+export type CreateTranslationInput = {
+  language: Scalars['String']['input'];
+  status?: InputMaybe<Scalars['String']['input']>;
+  translationKeyId: Scalars['String']['input'];
+  value: Scalars['String']['input'];
+};
+
 export type CreateTranslationKeyInput = {
   context?: InputMaybe<Scalars['String']['input']>;
   description?: InputMaybe<Scalars['String']['input']>;
@@ -149,8 +156,11 @@ export type Mutation = {
   createApiKey: ApiKeyEntity;
   createChannel: Channel;
   createProject: ProjectEntity;
+  createTranslation: TranslationEntity;
   createTranslationKey: TranslationKeyEntity;
   deleteApiKey: Scalars['Boolean']['output'];
+  deleteTranslation: TranslationEntity;
+  deleteTranslationKey: TranslationKeyEntity;
   exportTranslations: ExportResult;
   importTranslations: ImportResult;
   loginUser: AuthenticationPayload;
@@ -162,6 +172,8 @@ export type Mutation = {
   retryFailedJobsByType: RetryJobResult;
   revokeApiKey: Scalars['Boolean']['output'];
   syncTranslations: SyncTranslationsResult;
+  updateTranslation: TranslationEntity;
+  updateTranslationKey: TranslationKeyEntity;
 };
 
 
@@ -185,12 +197,27 @@ export type MutationCreateProjectArgs = {
 };
 
 
+export type MutationCreateTranslationArgs = {
+  input: CreateTranslationInput;
+};
+
+
 export type MutationCreateTranslationKeyArgs = {
   input: CreateTranslationKeyInput;
 };
 
 
 export type MutationDeleteApiKeyArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteTranslationArgs = {
+  id: Scalars['String']['input'];
+};
+
+
+export type MutationDeleteTranslationKeyArgs = {
   id: Scalars['String']['input'];
 };
 
@@ -243,6 +270,16 @@ export type MutationRevokeApiKeyArgs = {
 
 export type MutationSyncTranslationsArgs = {
   input: SyncTranslationsInput;
+};
+
+
+export type MutationUpdateTranslationArgs = {
+  input: UpdateTranslationInput;
+};
+
+
+export type MutationUpdateTranslationKeyArgs = {
+  input: UpdateTranslationKeyInput;
 };
 
 export type ProjectEntity = {
@@ -370,6 +407,19 @@ export enum SyncTranslationsType {
   SingleKey = 'SINGLE_KEY'
 }
 
+export type TranslationEntity = {
+  __typename?: 'TranslationEntity';
+  createdAt: Scalars['DateTime']['output'];
+  id: Scalars['String']['output'];
+  languageId: Scalars['String']['output'];
+  machineTranslated: Scalars['Boolean']['output'];
+  reviewNotes?: Maybe<Scalars['String']['output']>;
+  status: TranslationStatus;
+  translationKeyId: Scalars['String']['output'];
+  updatedAt: Scalars['DateTime']['output'];
+  value: Scalars['String']['output'];
+};
+
 export type TranslationKeyEntity = {
   __typename?: 'TranslationKeyEntity';
   context?: Maybe<Scalars['String']['output']>;
@@ -379,8 +429,16 @@ export type TranslationKeyEntity = {
   isActive: Scalars['Boolean']['output'];
   key: Scalars['String']['output'];
   projectId: Scalars['String']['output'];
+  translations: TranslationsResponse;
   updatedAt: Scalars['DateTime']['output'];
 };
+
+export enum TranslationStatus {
+  Approved = 'APPROVED',
+  InReview = 'IN_REVIEW',
+  MachineTranslated = 'MACHINE_TRANSLATED',
+  Untranslated = 'UNTRANSLATED'
+}
 
 export type TranslationsResponse = {
   __typename?: 'TranslationsResponse';
@@ -389,6 +447,20 @@ export type TranslationsResponse = {
   totalKeys: Scalars['Float']['output'];
   translatedKeys: Scalars['Float']['output'];
   translations: Scalars['JSON']['output'];
+};
+
+export type UpdateTranslationInput = {
+  id: Scalars['String']['input'];
+  status?: InputMaybe<Scalars['String']['input']>;
+  value?: InputMaybe<Scalars['String']['input']>;
+};
+
+export type UpdateTranslationKeyInput = {
+  context?: InputMaybe<Scalars['String']['input']>;
+  description?: InputMaybe<Scalars['String']['input']>;
+  id: Scalars['String']['input'];
+  isActive?: InputMaybe<Scalars['Boolean']['input']>;
+  key?: InputMaybe<Scalars['String']['input']>;
 };
 
 export type User = {
@@ -405,6 +477,13 @@ export type UserConnection = {
   items: Array<User>;
   totalCount: Scalars['Int']['output'];
 };
+
+export type CreateProjectMutationVariables = Exact<{
+  input: CreateProjectInput;
+}>;
+
+
+export type CreateProjectMutation = { __typename?: 'Mutation', createProject: { __typename?: 'ProjectEntity', id: string, name: string, description?: string | null, slug: string, isActive: boolean, channelToken: string, createdAt: any, updatedAt: any } };
 
 export type CreateTranslationKeyMutationVariables = Exact<{
   input: CreateTranslationKeyInput;
@@ -434,6 +513,41 @@ export type ImportTranslationsMutationVariables = Exact<{
 
 export type ImportTranslationsMutation = { __typename?: 'Mutation', importTranslations: { __typename?: 'ImportResult', jobId: string, message: string, status: string, totalKeys: number } };
 
+export type CreateTranslationMutationVariables = Exact<{
+  input: CreateTranslationInput;
+}>;
+
+
+export type CreateTranslationMutation = { __typename?: 'Mutation', createTranslation: { __typename?: 'TranslationEntity', id: string, value: string, status: TranslationStatus, machineTranslated: boolean, reviewNotes?: string | null, translationKeyId: string, languageId: string, createdAt: any, updatedAt: any } };
+
+export type UpdateTranslationMutationVariables = Exact<{
+  input: UpdateTranslationInput;
+}>;
+
+
+export type UpdateTranslationMutation = { __typename?: 'Mutation', updateTranslation: { __typename?: 'TranslationEntity', id: string, value: string, status: TranslationStatus, machineTranslated: boolean, reviewNotes?: string | null, translationKeyId: string, languageId: string, createdAt: any, updatedAt: any } };
+
+export type DeleteTranslationMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type DeleteTranslationMutation = { __typename?: 'Mutation', deleteTranslation: { __typename?: 'TranslationEntity', id: string, value: string, status: TranslationStatus, machineTranslated: boolean, reviewNotes?: string | null, translationKeyId: string, languageId: string, createdAt: any, updatedAt: any } };
+
+export type UpdateTranslationKeyMutationVariables = Exact<{
+  input: UpdateTranslationKeyInput;
+}>;
+
+
+export type UpdateTranslationKeyMutation = { __typename?: 'Mutation', updateTranslationKey: { __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any } };
+
+export type DeleteTranslationKeyMutationVariables = Exact<{
+  id: Scalars['String']['input'];
+}>;
+
+
+export type DeleteTranslationKeyMutation = { __typename?: 'Mutation', deleteTranslationKey: { __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any } };
+
 export type GetProjectsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
@@ -451,7 +565,7 @@ export type GetProjectTranslationsQueryVariables = Exact<{
 }>;
 
 
-export type GetProjectTranslationsQuery = { __typename?: 'Query', translationKeys: Array<{ __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any }> };
+export type GetProjectTranslationsQuery = { __typename?: 'Query', translationKeys: Array<{ __typename?: 'TranslationKeyEntity', id: string, key: string, description?: string | null, context?: string | null, isActive: boolean, projectId: string, createdAt: any, updatedAt: any, translations: { __typename?: 'TranslationsResponse', language: string, totalKeys: number, translatedKeys: number, translations: any } }> };
 
 export type GetTranslationsQueryVariables = Exact<{
   projectId: Scalars['String']['input'];
@@ -460,13 +574,6 @@ export type GetTranslationsQueryVariables = Exact<{
 
 
 export type GetTranslationsQuery = { __typename?: 'Query', getTranslations: { __typename?: 'TranslationsResponse', language: string, projectId: string, totalKeys: number, translatedKeys: number, translations: any } };
-
-export type CreateProjectMutationVariables = Exact<{
-  input: CreateProjectInput;
-}>;
-
-
-export type CreateProjectMutation = { __typename?: 'Mutation', createProject: { __typename?: 'ProjectEntity', id: string, name: string, description?: string | null, slug: string, isActive: boolean, channelToken: string, createdAt: any, updatedAt: any } };
 
 export type GetUserQueryVariables = Exact<{
   id: Scalars['String']['input'];
@@ -481,6 +588,20 @@ export type MeQueryVariables = Exact<{ [key: string]: never; }>;
 export type MeQuery = { __typename?: 'Query', me?: { __typename?: 'User', id: string, name?: string | null, email: string, createdAt?: any | null, updatedAt?: any | null } | null };
 
 
+export const CreateProjectDocument = gql`
+    mutation CreateProject($input: CreateProjectInput!) {
+  createProject(input: $input) {
+    id
+    name
+    description
+    slug
+    isActive
+    channelToken
+    createdAt
+    updatedAt
+  }
+}
+    `;
 export const CreateTranslationKeyDocument = gql`
     mutation CreateTranslationKey($input: CreateTranslationKeyInput!) {
   createTranslationKey(input: $input) {
@@ -527,6 +648,79 @@ export const ImportTranslationsDocument = gql`
   }
 }
     `;
+export const CreateTranslationDocument = gql`
+    mutation CreateTranslation($input: CreateTranslationInput!) {
+  createTranslation(input: $input) {
+    id
+    value
+    status
+    machineTranslated
+    reviewNotes
+    translationKeyId
+    languageId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export const UpdateTranslationDocument = gql`
+    mutation UpdateTranslation($input: UpdateTranslationInput!) {
+  updateTranslation(input: $input) {
+    id
+    value
+    status
+    machineTranslated
+    reviewNotes
+    translationKeyId
+    languageId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export const DeleteTranslationDocument = gql`
+    mutation DeleteTranslation($id: String!) {
+  deleteTranslation(id: $id) {
+    id
+    value
+    status
+    machineTranslated
+    reviewNotes
+    translationKeyId
+    languageId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export const UpdateTranslationKeyDocument = gql`
+    mutation UpdateTranslationKey($input: UpdateTranslationKeyInput!) {
+  updateTranslationKey(input: $input) {
+    id
+    key
+    description
+    context
+    isActive
+    projectId
+    createdAt
+    updatedAt
+  }
+}
+    `;
+export const DeleteTranslationKeyDocument = gql`
+    mutation DeleteTranslationKey($id: String!) {
+  deleteTranslationKey(id: $id) {
+    id
+    key
+    description
+    context
+    isActive
+    projectId
+    createdAt
+    updatedAt
+  }
+}
+    `;
 export const GetProjectsDocument = gql`
     query GetProjects {
   projects {
@@ -564,6 +758,12 @@ export const GetProjectTranslationsDocument = gql`
     context
     isActive
     projectId
+    translations {
+      language
+      totalKeys
+      translatedKeys
+      translations
+    }
     createdAt
     updatedAt
   }
@@ -577,20 +777,6 @@ export const GetTranslationsDocument = gql`
     totalKeys
     translatedKeys
     translations
-  }
-}
-    `;
-export const CreateProjectDocument = gql`
-    mutation CreateProject($input: CreateProjectInput!) {
-  createProject(input: $input) {
-    id
-    name
-    description
-    slug
-    isActive
-    channelToken
-    createdAt
-    updatedAt
   }
 }
     `;
@@ -619,6 +805,9 @@ export const MeDocument = gql`
 export type Requester<C = {}> = <R, V>(doc: DocumentNode, vars?: V, options?: C) => Promise<R> | AsyncIterable<R>
 export function getSdk<C>(requester: Requester<C>) {
   return {
+    CreateProject(variables: CreateProjectMutationVariables, options?: C): Promise<CreateProjectMutation> {
+      return requester<CreateProjectMutation, CreateProjectMutationVariables>(CreateProjectDocument, variables, options) as Promise<CreateProjectMutation>;
+    },
     CreateTranslationKey(variables: CreateTranslationKeyMutationVariables, options?: C): Promise<CreateTranslationKeyMutation> {
       return requester<CreateTranslationKeyMutation, CreateTranslationKeyMutationVariables>(CreateTranslationKeyDocument, variables, options) as Promise<CreateTranslationKeyMutation>;
     },
@@ -631,6 +820,21 @@ export function getSdk<C>(requester: Requester<C>) {
     ImportTranslations(variables: ImportTranslationsMutationVariables, options?: C): Promise<ImportTranslationsMutation> {
       return requester<ImportTranslationsMutation, ImportTranslationsMutationVariables>(ImportTranslationsDocument, variables, options) as Promise<ImportTranslationsMutation>;
     },
+    CreateTranslation(variables: CreateTranslationMutationVariables, options?: C): Promise<CreateTranslationMutation> {
+      return requester<CreateTranslationMutation, CreateTranslationMutationVariables>(CreateTranslationDocument, variables, options) as Promise<CreateTranslationMutation>;
+    },
+    UpdateTranslation(variables: UpdateTranslationMutationVariables, options?: C): Promise<UpdateTranslationMutation> {
+      return requester<UpdateTranslationMutation, UpdateTranslationMutationVariables>(UpdateTranslationDocument, variables, options) as Promise<UpdateTranslationMutation>;
+    },
+    DeleteTranslation(variables: DeleteTranslationMutationVariables, options?: C): Promise<DeleteTranslationMutation> {
+      return requester<DeleteTranslationMutation, DeleteTranslationMutationVariables>(DeleteTranslationDocument, variables, options) as Promise<DeleteTranslationMutation>;
+    },
+    UpdateTranslationKey(variables: UpdateTranslationKeyMutationVariables, options?: C): Promise<UpdateTranslationKeyMutation> {
+      return requester<UpdateTranslationKeyMutation, UpdateTranslationKeyMutationVariables>(UpdateTranslationKeyDocument, variables, options) as Promise<UpdateTranslationKeyMutation>;
+    },
+    DeleteTranslationKey(variables: DeleteTranslationKeyMutationVariables, options?: C): Promise<DeleteTranslationKeyMutation> {
+      return requester<DeleteTranslationKeyMutation, DeleteTranslationKeyMutationVariables>(DeleteTranslationKeyDocument, variables, options) as Promise<DeleteTranslationKeyMutation>;
+    },
     GetProjects(variables?: GetProjectsQueryVariables, options?: C): Promise<GetProjectsQuery> {
       return requester<GetProjectsQuery, GetProjectsQueryVariables>(GetProjectsDocument, variables, options) as Promise<GetProjectsQuery>;
     },
@@ -642,9 +846,6 @@ export function getSdk<C>(requester: Requester<C>) {
     },
     GetTranslations(variables: GetTranslationsQueryVariables, options?: C): Promise<GetTranslationsQuery> {
       return requester<GetTranslationsQuery, GetTranslationsQueryVariables>(GetTranslationsDocument, variables, options) as Promise<GetTranslationsQuery>;
-    },
-    CreateProject(variables: CreateProjectMutationVariables, options?: C): Promise<CreateProjectMutation> {
-      return requester<CreateProjectMutation, CreateProjectMutationVariables>(CreateProjectDocument, variables, options) as Promise<CreateProjectMutation>;
     },
     GetUser(variables: GetUserQueryVariables, options?: C): Promise<GetUserQuery> {
       return requester<GetUserQuery, GetUserQueryVariables>(GetUserDocument, variables, options) as Promise<GetUserQuery>;
