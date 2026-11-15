@@ -1,5 +1,9 @@
+import Link from 'next/link'
+import { FolderOpen } from 'lucide-react'
 import { sdk } from '@/graphql'
 import { ProjectCard } from '@/components/dashboard/project-card'
+import { EmptyState } from '@/components/common/empty-state'
+import { Button } from '@/components/ui/button'
 
 export default async function DashboardPage() {
   const api = sdk()
@@ -21,19 +25,24 @@ export default async function DashboardPage() {
         </div>
 
         {!projects?.length && (
-          <div className="text-center py-12">
-            <p className="text-gray-500">
-              No projects found. Create your first project to get started.
-            </p>
-          </div>
+          <EmptyState
+            icon={FolderOpen}
+            title="No projects yet"
+            description="Create your first project to start managing translations."
+            action={
+              <Button asChild size="sm">
+                <Link href="/projects">Go to Projects</Link>
+              </Button>
+            }
+          />
         )}
       </div>
     )
-  } catch (error) {
+  } catch {
     return (
       <div className="p-6">
         <div className="text-center py-12">
-          <p className="text-red-500">
+          <p role="alert" className="text-red-500">
             Error loading projects. Please try again.
           </p>
         </div>

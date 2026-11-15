@@ -58,7 +58,9 @@ export default function ProjectPage() {
     return (
       <div className="p-6">
         <div className="text-center py-12">
-          <p className="text-gray-500">Loading project...</p>
+          <p role="status" className="text-gray-500">
+            Loading project...
+          </p>
         </div>
       </div>
     )
@@ -68,7 +70,7 @@ export default function ProjectPage() {
     return (
       <div className="p-6">
         <div className="text-center py-12">
-          <p className="text-red-500">
+          <p role="alert" className="text-red-500">
             Error loading project. Please try again.
           </p>
         </div>
@@ -93,7 +95,7 @@ export default function ProjectPage() {
   const translationKeys: TranslationKey[] = translationKeyEntities.map(
     (entity) => {
       // Parse the translations JSON from the TranslationsResponse
-      let translations: Record<string, Translation> = {}
+      const translations: Record<string, Translation> = {}
 
       if (entity.translations?.translations) {
         try {
