@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useApolloClient } from '@apollo/client'
 import {
   Table,
@@ -22,6 +22,7 @@ import {
   Zap,
   Edit2,
   Trash2,
+  Languages,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -31,6 +32,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { KeyDetailsPanel } from './key-details-panel'
 import { CreateTranslationKeyModal } from './create-translation-key-modal'
+import { GridStatusBar } from './grid-status-bar'
+import {
+  TRANSLATION_STATUS_LABELS,
+  countTranslationStatuses,
+  type TranslationStatus,
+} from './translation-status'
+import { EmptyState } from '@/components/common/empty-state'
 import {
   useCreateTranslationMutation,
   useUpdateTranslationMutation,
@@ -45,7 +53,7 @@ import React from 'react'
 interface Translation {
   id?: string
   value: string
-  status: 'UNTRANSLATED' | 'MACHINE_TRANSLATED' | 'IN_REVIEW' | 'APPROVED'
+  status: TranslationStatus
   machineTranslated: boolean
   translationKeyId: string
   languageId: string
@@ -86,6 +94,20 @@ export function TranslationGrid({
   const [error, setError] = useState<string | null>(null)
 
   const apolloClient = useApolloClient()
+
+  // Keyboard users get focus returned to the cell they were editing after
+  // saving or cancelling, so they can keep tabbing through the grid.
+  const gridId = useId()
+  const cellDomId = (keyId: string, language: string) =>
+    `${gridId}-cell-${keyId}-${language}`
+  const focusAfterEditRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    if (editingCell === null && focusAfterEditRef.current) {
+      document.getElementById(focusAfterEditRef.current)?.focus()
+      focusAfterEditRef.current = null
+    }
+  }, [editingCell])
 
   // Read from Apollo cache to get real-time updates
   const { data: translationKeysData } = useGetProjectTranslationsQuery({
@@ -370,6 +392,7 @@ export function TranslationGrid({
     language: string,
     currentValue: string = '',
   ) => {
+    focusAfterEditRef.current = cellDomId(keyId, language)
     setEditingCell({ keyId, language, value: currentValue })
   }
 
@@ -514,6 +537,11 @@ export function TranslationGrid({
     }
   }
 
+  const statusCounts = countTranslationStatuses(
+    displayTranslationKeys,
+    languages,
+  )
+
   const isEditing = (keyId: string, language: string) => {
     return editingCell?.keyId === keyId && editingCell?.language === language
   }
@@ -539,7 +567,10 @@ export function TranslationGrid({
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+        <div
+          role="alert"
+          className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md"
+        >
           <div className="flex justify-between items-center">
             <span className="text-sm">{error}</span>
             <Button
@@ -547,6 +578,7 @@ export function TranslationGrid({
               variant="ghost"
               onClick={() => setError(null)}
               className="h-6 w-6 p-0"
+              aria-label="Dismiss error"
             >
               <X className="h-4 w-4" />
             </Button>
@@ -554,209 +586,257 @@ export function TranslationGrid({
         </div>
       )}
 
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px] font-semibold">Key</TableHead>
-              <TableHead className="w-[150px] font-semibold">
-                Description
-              </TableHead>
-              {languages.map((lang) => (
-                <TableHead key={lang} className="min-w-[200px] font-semibold">
-                  {lang.toUpperCase()}
-                </TableHead>
-              ))}
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {displayTranslationKeys.map((translationKey) => (
-              <TableRow key={translationKey.id} className="hover:bg-gray-50">
-                <TableCell className="font-mono text-sm">
-                  <div className="flex items-center space-x-2">
-                    <span>{translationKey.key}</span>
-                    {!translationKey.isActive && (
-                      <Badge variant="secondary" className="text-xs">
-                        Inactive
-                      </Badge>
-                    )}
-                  </div>
-                </TableCell>
+      {displayTranslationKeys.length > 0 ? (
+        <>
+          <GridStatusBar
+            keyCount={displayTranslationKeys.length}
+            languageCount={languages.length}
+            counts={statusCounts}
+          />
 
-                <TableCell className="text-sm text-gray-600">
-                  {translationKey.description || '-'}
-                </TableCell>
+          <div className="border rounded-lg overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[200px] font-semibold">Key</TableHead>
+                  <TableHead className="w-[150px] font-semibold">
+                    Description
+                  </TableHead>
+                  {languages.map((lang) => (
+                    <TableHead
+                      key={lang}
+                      className="min-w-[200px] font-semibold"
+                    >
+                      {lang.toUpperCase()}
+                    </TableHead>
+                  ))}
+                  <TableHead className="w-[50px]">
+                    <span className="sr-only">Actions</span>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {displayTranslationKeys.map((translationKey) => (
+                  <TableRow
+                    key={translationKey.id}
+                    className="hover:bg-gray-50"
+                  >
+                    <TableCell className="font-mono text-sm">
+                      <div className="flex items-center space-x-2">
+                        <span>{translationKey.key}</span>
+                        {!translationKey.isActive && (
+                          <Badge variant="secondary" className="text-xs">
+                            Inactive
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
 
-                {languages.map((language) => {
-                  const isCurrentlyEditing = isEditing(
-                    translationKey.id,
-                    language,
-                  )
-                  const translation = translationKey.translations?.[language]
-                  const translationValue = translation?.value || ''
+                    <TableCell className="text-sm text-gray-600">
+                      {translationKey.description || '-'}
+                    </TableCell>
 
-                  return (
-                    <TableCell key={language} className="relative">
-                      {isCurrentlyEditing ? (
-                        <div className="flex items-center space-x-2">
-                          <Input
-                            value={editingCell?.value || ''}
-                            onChange={(e) =>
-                              setEditingCell((prev) =>
-                                prev
-                                  ? { ...prev, value: e.target.value }
-                                  : null,
-                              )
-                            }
-                            className="text-sm"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleSave(
-                                  translationKey.id,
-                                  language,
-                                  editingCell?.value || '',
-                                )
-                              }
-                              if (e.key === 'Escape') {
-                                handleCancel()
-                              }
-                            }}
-                          />
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            disabled={loading}
-                            onClick={() =>
-                              handleSave(
-                                translationKey.id,
-                                language,
-                                editingCell?.value || '',
-                              )
-                            }
-                          >
-                            <Save className="h-3 w-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={handleCancel}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div
-                          className="min-h-[2rem] p-2 rounded cursor-text hover:bg-gray-100 text-sm flex items-center justify-between"
-                          onClick={() =>
-                            handleCellClick(
-                              translationKey.id,
-                              language,
-                              translationValue,
-                            )
-                          }
-                        >
-                          {translationValue ? (
-                            <div className="flex items-center justify-between w-full group">
-                              <div className="flex items-center space-x-2">
-                                <span className="text-gray-900">
-                                  {translationValue}
-                                </span>
-                                {translation?.machineTranslated && (
-                                  <Badge
-                                    variant="secondary"
-                                    className="text-xs"
-                                  >
-                                    <Zap className="mr-1 h-3 w-3" />
-                                    AI
-                                  </Badge>
-                                )}
-                                {translation?.status && (
-                                  <Badge
-                                    variant={
-                                      translation.status === 'APPROVED'
-                                        ? 'default'
-                                        : 'outline'
-                                    }
-                                    className="text-xs"
-                                  >
-                                    {translation.status}
-                                  </Badge>
-                                )}
-                              </div>
+                    {languages.map((language) => {
+                      const isCurrentlyEditing = isEditing(
+                        translationKey.id,
+                        language,
+                      )
+                      const translation =
+                        translationKey.translations?.[language]
+                      const translationValue = translation?.value || ''
+
+                      return (
+                        <TableCell key={language} className="relative">
+                          {isCurrentlyEditing ? (
+                            <div className="flex items-center space-x-2">
+                              <Input
+                                value={editingCell?.value || ''}
+                                onChange={(e) =>
+                                  setEditingCell((prev) =>
+                                    prev
+                                      ? { ...prev, value: e.target.value }
+                                      : null,
+                                  )
+                                }
+                                className="text-sm"
+                                aria-label={`${language.toUpperCase()} translation for ${translationKey.key}`}
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    handleSave(
+                                      translationKey.id,
+                                      language,
+                                      editingCell?.value || '',
+                                    )
+                                  }
+                                  if (e.key === 'Escape') {
+                                    handleCancel()
+                                  }
+                                }}
+                              />
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDeleteTranslation(
+                                disabled={loading}
+                                aria-label="Save translation"
+                                onClick={() =>
+                                  handleSave(
                                     translationKey.id,
                                     language,
+                                    editingCell?.value || '',
                                   )
-                                }}
+                                }
                               >
-                                <X className="h-3 w-3 text-red-500" />
+                                <Save className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                aria-label="Cancel editing"
+                                onClick={handleCancel}
+                              >
+                                <X className="h-3 w-3" />
                               </Button>
                             </div>
                           ) : (
-                            <span className="text-gray-400 italic">
-                              Click to add translation
-                            </span>
+                            <div className="group flex items-center gap-1">
+                              <button
+                                type="button"
+                                id={cellDomId(translationKey.id, language)}
+                                className="flex min-h-[2rem] flex-1 items-center gap-2 rounded p-2 text-left text-sm cursor-text outline-none hover:bg-gray-100 focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                                onClick={() =>
+                                  handleCellClick(
+                                    translationKey.id,
+                                    language,
+                                    translationValue,
+                                  )
+                                }
+                              >
+                                <span className="sr-only">
+                                  Edit {language.toUpperCase()} translation for{' '}
+                                  {translationKey.key}:{' '}
+                                </span>
+                                {translationValue ? (
+                                  <>
+                                    <span className="text-gray-900">
+                                      {translationValue}
+                                    </span>
+                                    {translation?.machineTranslated && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="text-xs"
+                                      >
+                                        <Zap className="mr-1 h-3 w-3" />
+                                        AI
+                                      </Badge>
+                                    )}
+                                    {translation?.status && (
+                                      <Badge
+                                        variant={
+                                          translation.status === 'APPROVED'
+                                            ? 'default'
+                                            : 'outline'
+                                        }
+                                        className="text-xs"
+                                      >
+                                        {TRANSLATION_STATUS_LABELS[
+                                          translation.status
+                                        ] ?? translation.status}
+                                      </Badge>
+                                    )}
+                                  </>
+                                ) : (
+                                  <span className="text-gray-400 italic">
+                                    Add translation
+                                  </span>
+                                )}
+                              </button>
+                              {translationValue && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  aria-label={`Delete ${language.toUpperCase()} translation for ${translationKey.key}`}
+                                  className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 h-6 w-6 p-0"
+                                  onClick={() =>
+                                    handleDeleteTranslation(
+                                      translationKey.id,
+                                      language,
+                                    )
+                                  }
+                                >
+                                  <X className="h-3 w-3 text-red-500" />
+                                </Button>
+                              )}
+                            </div>
                           )}
-                        </div>
-                      )}
+                        </TableCell>
+                      )
+                    })}
+
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            aria-label={`Actions for ${translationKey.key}`}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem
+                            onClick={() => handleOpenDetails(translationKey.id)}
+                          >
+                            <Info className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleEditTranslationKey(translationKey.id)
+                            }
+                          >
+                            <Edit2 className="mr-2 h-4 w-4" />
+                            Toggle Active
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleDeleteTranslationKey(translationKey.id)
+                            }
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Key
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
-                  )
-                })}
-
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => handleOpenDetails(translationKey.id)}
-                      >
-                        <Info className="mr-2 h-4 w-4" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleEditTranslationKey(translationKey.id)
-                        }
-                      >
-                        <Edit2 className="mr-2 h-4 w-4" />
-                        Toggle Active
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleDeleteTranslationKey(translationKey.id)
-                        }
-                        className="text-red-600"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        Delete Key
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-
-      {!displayTranslationKeys.length && (
-        <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500">
-            No translation keys found. Add your first key to get started.
-          </p>
-        </div>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </>
+      ) : (
+        <EmptyState
+          icon={Languages}
+          titleAs="h3"
+          title="No translation keys yet"
+          description={
+            <>
+              Keys like{' '}
+              <code className="font-mono text-gray-700">buttons.submit</code>{' '}
+              identify each piece of text in your app. Add one to start
+              translating.
+            </>
+          }
+          action={
+            <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add your first key
+            </Button>
+          }
+        />
       )}
 
       <KeyDetailsPanel

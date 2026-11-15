@@ -1,8 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { FolderOpen, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/common/empty-state'
 import { ProjectCard } from '@/components/dashboard/project-card'
 import { CreateProjectModal } from './create-project-modal'
 import { useGetProjectsQuery } from '@/graphql/generated/hooks'
@@ -23,7 +24,9 @@ export function ProjectsList() {
     return (
       <div className="p-6">
         <div className="text-center py-12">
-          <p className="text-gray-500">Loading projects...</p>
+          <p role="status" className="text-gray-500">
+            Loading projects...
+          </p>
         </div>
       </div>
     )
@@ -33,7 +36,9 @@ export function ProjectsList() {
     return (
       <div className="p-6">
         <div className="text-center py-12">
-          <p className="text-red-500">Error loading projects. Please try again.</p>
+          <p role="alert" className="text-red-500">
+            Error loading projects. Please try again.
+          </p>
           <Button 
             onClick={() => refetch()} 
             variant="outline" 
@@ -68,13 +73,17 @@ export function ProjectsList() {
       </div>
 
       {!projects.length && (
-        <div className="text-center py-12 border border-dashed border-gray-300 rounded-lg">
-          <p className="text-gray-500 mb-4">No projects found. Create your first project to get started.</p>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Create Your First Project
-          </Button>
-        </div>
+        <EmptyState
+          icon={FolderOpen}
+          title="No projects yet"
+          description="A project groups the translation keys and languages for one app or website."
+          action={
+            <Button size="sm" onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Create your first project
+            </Button>
+          }
+        />
       )}
 
       <CreateProjectModal
