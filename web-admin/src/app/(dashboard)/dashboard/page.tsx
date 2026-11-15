@@ -29,7 +29,7 @@ export default async function DashboardPage() {
         )}
       </div>
     )
-  } catch (error) {
+  } catch {
     return (
       <div className="p-6">
         <div className="text-center py-12">

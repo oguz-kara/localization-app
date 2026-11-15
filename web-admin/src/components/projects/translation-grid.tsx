@@ -32,7 +32,6 @@ import {
 import { KeyDetailsPanel } from './key-details-panel'
 import { CreateTranslationKeyModal } from './create-translation-key-modal'
 import {
-  useSyncTranslationsMutation,
   useCreateTranslationMutation,
   useUpdateTranslationMutation,
   useDeleteTranslationMutation,
@@ -99,7 +98,7 @@ export function TranslationGrid({
 
     return translationKeysData.translationKeys.map((entity: any) => {
       // Parse the translations JSON from the TranslationsResponse
-      let translations: Record<string, Translation> = {}
+      const translations: Record<string, Translation> = {}
 
       if (entity.translations?.translations) {
         try {
@@ -307,16 +306,6 @@ export function TranslationGrid({
       console.error('Error removing translation key from cache:', error)
     }
   }
-
-  const [syncTranslations] = useSyncTranslationsMutation({
-    onCompleted: (data) => {
-      console.log('Translation sync started:', data.syncTranslations)
-      // Could show toast notification with job ID
-    },
-    onError: (error) => {
-      console.error('Failed to sync translations:', error)
-    },
-  })
 
   const [createTranslation] = useCreateTranslationMutation({
     onError: (error) => {
@@ -600,7 +589,6 @@ export function TranslationGrid({
                 </TableCell>
 
                 {languages.map((language) => {
-                  const cellKey = `${translationKey.id}-${language}`
                   const isCurrentlyEditing = isEditing(
                     translationKey.id,
                     language,

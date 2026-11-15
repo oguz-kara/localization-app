@@ -93,7 +93,7 @@ export default function ProjectPage() {
   const translationKeys: TranslationKey[] = translationKeyEntities.map(
     (entity) => {
       // Parse the translations JSON from the TranslationsResponse
-      let translations: Record<string, Translation> = {}
+      const translations: Record<string, Translation> = {}
 
       if (entity.translations?.translations) {
         try {

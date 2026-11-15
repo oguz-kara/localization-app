@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -13,23 +13,17 @@ interface KeyDetailsPanelProps {
 
 export function KeyDetailsPanel({ translationKeyId, isOpen, onClose }: KeyDetailsPanelProps) {
   const panelRef = useRef<HTMLDivElement>(null)
-  const [isAnimating, setIsAnimating] = useState(false)
 
   useEffect(() => {
     if (!panelRef.current) return
 
     // For now, we'll use CSS transforms until GSAP is available
     if (isOpen) {
-      setIsAnimating(true)
       panelRef.current.style.transform = 'translateX(0%)'
       panelRef.current.style.opacity = '1'
-      // Remove animation flag after transition completes
-      setTimeout(() => setIsAnimating(false), 300)
     } else {
-      setIsAnimating(true)
       panelRef.current.style.transform = 'translateX(100%)'
       panelRef.current.style.opacity = '0'
-      setTimeout(() => setIsAnimating(false), 300)
     }
   }, [isOpen])
 
@@ -103,9 +97,9 @@ function HistoryTab({ translationKeyId }: { translationKeyId: string | null }) {
           </div>
           <div className="text-sm">
             <span className="text-gray-600">Changed EN translation from:</span>
-            <div className="mt-1 p-2 bg-red-50 rounded text-red-800">"Hello World"</div>
+            <div className="mt-1 p-2 bg-red-50 rounded text-red-800">&ldquo;Hello World&rdquo;</div>
             <span className="text-gray-600">to:</span>
-            <div className="mt-1 p-2 bg-green-50 rounded text-green-800">"Hello Universe"</div>
+            <div className="mt-1 p-2 bg-green-50 rounded text-green-800">&ldquo;Hello Universe&rdquo;</div>
           </div>
         </div>
         
@@ -116,7 +110,7 @@ function HistoryTab({ translationKeyId }: { translationKeyId: string | null }) {
           </div>
           <div className="text-sm">
             <span className="text-gray-600">Added ES translation:</span>
-            <div className="mt-1 p-2 bg-blue-50 rounded text-blue-800">"Hola Mundo"</div>
+            <div className="mt-1 p-2 bg-blue-50 rounded text-blue-800">&ldquo;Hola Mundo&rdquo;</div>
           </div>
         </div>
       </div>
